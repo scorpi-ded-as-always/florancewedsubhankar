@@ -2,8 +2,11 @@ import { Heart } from "lucide-react";
 
 const OurStory = () => {
   return (
-    <section id="our-story" className="py-20 md:py-32 px-6 bg-card/50">
-      <div className="max-w-6xl mx-auto">
+    <section id="our-story" className="py-20 md:py-32 px-6 bg-gradient-to-b from-background via-secondary/40 to-background relative overflow-hidden">
+      {/* Decorative elements */}
+      <div className="absolute top-20 right-0 w-72 h-72 rounded-full bg-primary/5 blur-3xl" />
+      <div className="absolute bottom-20 left-0 w-72 h-72 rounded-full bg-accent/5 blur-3xl" />
+      <div className="max-w-6xl mx-auto relative z-10">
         {/* Section header */}
         <div className="text-center mb-16">
           <p className="font-sans text-sm uppercase tracking-[0.3em] text-primary mb-4 opacity-0 animate-fade-up">

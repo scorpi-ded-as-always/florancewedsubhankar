@@ -1,4 +1,5 @@
 import { Heart, ChevronDown } from "lucide-react";
+import fsLogo from "@/assets/fs-logo.png";
 
 const HeroSection = () => {
   const scrollToStory = () => {
@@ -7,41 +8,69 @@ const HeroSection = () => {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background with elegant pattern */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-secondary/30 to-background" />
+      {/* Colorful gradient background */}
+      <div className="absolute inset-0 gradient-bg" />
+      
+      {/* Decorative floating elements */}
+      <div className="absolute top-20 left-10 w-32 h-32 rounded-full bg-primary/10 blur-3xl animate-float" />
+      <div className="absolute bottom-40 right-10 w-40 h-40 rounded-full bg-accent/10 blur-3xl animate-float" style={{ animationDelay: '1s' }} />
+      <div className="absolute top-1/3 right-1/4 w-24 h-24 rounded-full bg-gold/10 blur-2xl animate-float" style={{ animationDelay: '2s' }} />
       
       {/* Decorative floral corners */}
-      <div className="absolute top-0 left-0 w-32 h-32 md:w-48 md:h-48 opacity-20">
+      <div className="absolute top-0 left-0 w-40 h-40 md:w-56 md:h-56 opacity-30">
         <svg viewBox="0 0 100 100" className="w-full h-full text-primary">
           <path d="M0,50 Q25,25 50,0 Q25,25 0,50" fill="none" stroke="currentColor" strokeWidth="0.5" />
           <path d="M0,70 Q35,35 70,0 Q35,35 0,70" fill="none" stroke="currentColor" strokeWidth="0.5" />
-          <circle cx="20" cy="20" r="3" fill="currentColor" opacity="0.5" />
-          <circle cx="35" cy="10" r="2" fill="currentColor" opacity="0.3" />
+          <circle cx="20" cy="20" r="4" fill="currentColor" opacity="0.6" />
+          <circle cx="35" cy="10" r="2.5" fill="currentColor" opacity="0.4" />
+          <circle cx="10" cy="35" r="2" fill="currentColor" opacity="0.3" />
         </svg>
       </div>
-      <div className="absolute top-0 right-0 w-32 h-32 md:w-48 md:h-48 opacity-20 transform scale-x-[-1]">
+      <div className="absolute top-0 right-0 w-40 h-40 md:w-56 md:h-56 opacity-30 transform scale-x-[-1]">
         <svg viewBox="0 0 100 100" className="w-full h-full text-primary">
           <path d="M0,50 Q25,25 50,0 Q25,25 0,50" fill="none" stroke="currentColor" strokeWidth="0.5" />
           <path d="M0,70 Q35,35 70,0 Q35,35 0,70" fill="none" stroke="currentColor" strokeWidth="0.5" />
-          <circle cx="20" cy="20" r="3" fill="currentColor" opacity="0.5" />
-          <circle cx="35" cy="10" r="2" fill="currentColor" opacity="0.3" />
+          <circle cx="20" cy="20" r="4" fill="currentColor" opacity="0.6" />
+          <circle cx="35" cy="10" r="2.5" fill="currentColor" opacity="0.4" />
+          <circle cx="10" cy="35" r="2" fill="currentColor" opacity="0.3" />
+        </svg>
+      </div>
+      <div className="absolute bottom-0 left-0 w-40 h-40 md:w-56 md:h-56 opacity-20 transform scale-y-[-1]">
+        <svg viewBox="0 0 100 100" className="w-full h-full text-accent">
+          <path d="M0,50 Q25,25 50,0 Q25,25 0,50" fill="none" stroke="currentColor" strokeWidth="0.5" />
+          <path d="M0,70 Q35,35 70,0 Q35,35 0,70" fill="none" stroke="currentColor" strokeWidth="0.5" />
+        </svg>
+      </div>
+      <div className="absolute bottom-0 right-0 w-40 h-40 md:w-56 md:h-56 opacity-20 transform scale-[-1]">
+        <svg viewBox="0 0 100 100" className="w-full h-full text-accent">
+          <path d="M0,50 Q25,25 50,0 Q25,25 0,50" fill="none" stroke="currentColor" strokeWidth="0.5" />
+          <path d="M0,70 Q35,35 70,0 Q35,35 0,70" fill="none" stroke="currentColor" strokeWidth="0.5" />
         </svg>
       </div>
       
       {/* Main content */}
       <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
+        {/* Logo */}
+        <div className="flex justify-center mb-8 opacity-0 animate-fade-up">
+          <img 
+            src={fsLogo} 
+            alt="F & S Logo" 
+            className="w-28 h-28 md:w-36 md:h-36 drop-shadow-lg"
+          />
+        </div>
+        
         {/* Decorative line */}
-        <div className="flex items-center justify-center gap-4 mb-8 opacity-0 animate-fade-up">
-          <div className="h-px w-16 md:w-24 bg-gradient-to-r from-transparent to-primary/50" />
-          <Heart className="w-4 h-4 text-primary" fill="currentColor" />
-          <div className="h-px w-16 md:w-24 bg-gradient-to-l from-transparent to-primary/50" />
+        <div className="flex items-center justify-center gap-4 mb-6 opacity-0 animate-fade-up animation-delay-200">
+          <div className="h-px w-16 md:w-24 bg-gradient-to-r from-transparent via-primary/60 to-primary" />
+          <Heart className="w-5 h-5 text-primary" fill="currentColor" />
+          <div className="h-px w-16 md:w-24 bg-gradient-to-l from-transparent via-primary/60 to-primary" />
         </div>
         
         {/* Names */}
         <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-light tracking-wide text-foreground opacity-0 animate-fade-up animation-delay-200">
-          Florance
-          <span className="block text-3xl sm:text-4xl md:text-5xl text-primary my-4 italic font-light">&</span>
-          Subhankar
+          <span className="text-rose-gradient">Florance</span>
+          <span className="block text-3xl sm:text-4xl md:text-5xl text-accent my-4 italic font-light">&</span>
+          <span className="text-rose-gradient">Subhankar</span>
         </h1>
         
         {/* Subtitle */}
@@ -61,11 +90,11 @@ const HeroSection = () => {
         
         {/* Decorative element */}
         <div className="mt-12 flex items-center justify-center gap-2 opacity-0 animate-fade-up animation-delay-800">
-          <div className="w-1 h-1 rounded-full bg-primary" />
-          <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-          <div className="w-2 h-2 rounded-full bg-primary" />
-          <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-          <div className="w-1 h-1 rounded-full bg-primary" />
+          <div className="w-1.5 h-1.5 rounded-full bg-accent" />
+          <div className="w-2 h-2 rounded-full bg-primary/70" />
+          <div className="w-2.5 h-2.5 rounded-full bg-primary" />
+          <div className="w-2 h-2 rounded-full bg-primary/70" />
+          <div className="w-1.5 h-1.5 rounded-full bg-accent" />
         </div>
       </div>
       
