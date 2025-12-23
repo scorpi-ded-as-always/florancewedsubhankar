@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
+import fsLogo from "@/assets/fs-logo.png";
 
 const navLinks = [
   { href: "#our-story", label: "Our Story" },
@@ -36,8 +37,8 @@ const Navigation = () => {
       <nav 
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           isScrolled 
-            ? 'bg-background/95 backdrop-blur-md shadow-md py-4' 
-            : 'bg-transparent py-6'
+            ? 'bg-background/95 backdrop-blur-md shadow-lg py-3' 
+            : 'bg-transparent py-5'
         }`}
       >
         <div className="max-w-6xl mx-auto px-6 flex items-center justify-between">
@@ -48,9 +49,16 @@ const Navigation = () => {
               e.preventDefault();
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            className="font-serif text-xl md:text-2xl font-light text-foreground hover:text-primary transition-colors"
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
           >
-            F & S
+            <img 
+              src={fsLogo} 
+              alt="F & S" 
+              className={`transition-all duration-300 ${
+                isScrolled ? 'h-10 w-10' : 'h-12 w-12'
+              }`}
+              style={{ filter: isScrolled ? 'invert(0)' : 'invert(0)' }}
+            />
           </a>
           
           {/* Desktop links */}
@@ -60,7 +68,7 @@ const Navigation = () => {
                 key={link.href}
                 href={link.href}
                 onClick={(e) => handleNavClick(e, link.href)}
-                className="font-sans text-sm uppercase tracking-wider text-foreground/80 hover:text-primary transition-colors"
+                className="font-sans text-sm uppercase tracking-wider text-foreground/80 hover:text-primary transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-primary after:transition-all hover:after:w-full"
               >
                 {link.label}
               </a>
@@ -91,6 +99,7 @@ const Navigation = () => {
         }`}
       >
         <div className="flex flex-col items-center justify-center h-full gap-8">
+          <img src={fsLogo} alt="F & S" className="h-20 w-20 mb-4" />
           {navLinks.map((link, index) => (
             <a
               key={link.href}

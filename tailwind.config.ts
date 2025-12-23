@@ -61,8 +61,12 @@ export default {
         "gold-light": "hsl(var(--gold-light))",
         ivory: "hsl(var(--ivory))",
         blush: "hsl(var(--blush))",
+        rose: "hsl(var(--rose))",
+        "rose-light": "hsl(var(--rose-light))",
         sage: "hsl(var(--sage))",
         forest: "hsl(var(--forest))",
+        peach: "hsl(var(--peach))",
+        terracotta: "hsl(var(--terracotta))",
       },
       fontFamily: {
         serif: ['Cormorant Garamond', 'Georgia', 'serif'],
