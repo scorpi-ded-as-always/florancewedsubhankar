@@ -52,12 +52,18 @@ const HeroSection = () => {
       <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
         {/* Logo */}
         <div className="flex justify-center mb-8 opacity-0 animate-fade-up">
-          <img 
-            src={fsLogo} 
-            alt="F & S Logo" 
-            className="w-28 h-28 md:w-36 md:h-36 drop-shadow-lg"
-            style={{ filter: 'sepia(100%) saturate(300%) brightness(90%) hue-rotate(5deg)' }}
-          />
+          <div className="relative">
+            {/* Glow effect behind logo */}
+            <div className="absolute inset-0 bg-primary/30 rounded-full blur-2xl scale-125" />
+            <img 
+              src={fsLogo} 
+              alt="F & S Logo" 
+              className="relative w-32 h-32 md:w-44 md:h-44 drop-shadow-2xl"
+              style={{ 
+                filter: 'sepia(100%) saturate(400%) brightness(70%) hue-rotate(5deg) contrast(1.1)',
+              }}
+            />
+          </div>
         </div>
         
         {/* Decorative line */}
