@@ -72,7 +72,7 @@ async function getAccessToken(serviceAccountKey: string): Promise<string> {
 async function uploadToDrive(
   accessToken: string,
   fileName: string,
-  fileData: Uint8Array,
+  fileBlob: Blob,
   mimeType: string,
   folderId: string
 ): Promise<{ id: string; name: string }> {
@@ -81,21 +81,10 @@ async function uploadToDrive(
     parents: folderId ? [folderId] : undefined,
   };
 
-  const boundary = '-------314159265358979323846';
-  const delimiter = `\r\n--${boundary}\r\n`;
-  const closeDelimiter = `\r\n--${boundary}--`;
-
-  const metadataPart = delimiter +
-    'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
-    JSON.stringify(metadata);
-
-  const filePart = delimiter +
-    `Content-Type: ${mimeType}\r\n` +
-    'Content-Transfer-Encoding: base64\r\n\r\n';
-
-  const fileBase64 = btoa(String.fromCharCode(...fileData));
-
-  const requestBody = metadataPart + filePart + fileBase64 + closeDelimiter;
+  // Use FormData for multipart upload (handles large files better)
+  const form = new FormData();
+  form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+  form.append('file', fileBlob, fileName);
 
   const response = await fetch(
     'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',
@@ -103,9 +92,8 @@ async function uploadToDrive(
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': `multipart/related; boundary=${boundary}`,
       },
-      body: requestBody,
+      body: form,
     }
   );
 
@@ -153,9 +141,6 @@ serve(async (req) => {
     console.log('Got Google access token');
 
     // Upload to Google Drive
-    const arrayBuffer = await fileData.arrayBuffer();
-    const uint8Array = new Uint8Array(arrayBuffer);
-    
     const finalFileName = guestName 
       ? `${guestName}_${fileName}` 
       : fileName;
@@ -163,7 +148,7 @@ serve(async (req) => {
     const driveResult = await uploadToDrive(
       accessToken,
       finalFileName,
-      uint8Array,
+      fileData,
       fileData.type || 'image/jpeg',
       DRIVE_FOLDER_ID
     );
