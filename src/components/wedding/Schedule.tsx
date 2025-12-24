@@ -26,14 +26,14 @@ const scheduleItems = [
     date: "6th February",
     time: "6:30 PM",
     title: "Baraat Welcome",
-    description: "Traditional groom's procession at XYZ Lodge",
+    description: "Traditional groom's procession at Lodge Bhakti Bhawan",
     icon: Music,
   },
   {
     date: "6th February",
     time: "7:00 PM",
     title: "Hindu Ceremony",
-    description: "Sacred rituals & Pheras at XYZ Lodge, Krishnagar",
+    description: "Sacred rituals & Pheras at Lodge Bhakti Bhawan, Krishnagar",
     icon: Sparkles,
   },
   {
