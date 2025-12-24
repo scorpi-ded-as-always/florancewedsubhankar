@@ -52,7 +52,6 @@ const PhotoDump = () => {
 
     let successCount = 0;
     let errorCount = 0;
-    let lastErrorMessage: string | undefined;
 
     for (const uploadedFile of files) {
       if (uploadedFile.status === 'success') continue;
@@ -63,30 +62,18 @@ const PhotoDump = () => {
           f.id === uploadedFile.id ? { ...f, status: 'uploading' as const } : f
         ));
 
-        // Generate unique file path
+        // Generate unique file path with guest name prefix
         const fileExt = uploadedFile.file.name.split('.').pop();
-        const filePath = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+        const guestPrefix = guestName.trim() ? `${guestName.trim().replace(/\s+/g, '-')}_` : '';
+        const filePath = `${guestPrefix}${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
 
-        // Upload to storage
+        // Upload directly to Lovable Cloud storage
         const { error: uploadError } = await supabase.storage
           .from('photo-dump')
           .upload(filePath, uploadedFile.file);
 
         if (uploadError) {
           throw new Error(uploadError.message);
-        }
-
-        // Trigger Google Drive upload via backend function
-        const { data, error: fnError } = await supabase.functions.invoke('upload-to-drive', {
-          body: {
-            filePath,
-            fileName: uploadedFile.file.name,
-            guestName: guestName.trim() || 'Anonymous Guest'
-          }
-        });
-
-        if (fnError || !data?.success) {
-          throw new Error(fnError?.message || data?.error || 'Upload failed');
         }
 
         successCount += 1;
@@ -100,7 +87,6 @@ const PhotoDump = () => {
         const message = error instanceof Error ? error.message : 'Upload failed';
         console.error('Upload error:', error);
         errorCount += 1;
-        lastErrorMessage = message;
 
         toast.error(`Couldn't upload ${uploadedFile.file.name}`, {
           description: message,
@@ -118,9 +104,7 @@ const PhotoDump = () => {
       toast.success(`${successCount} photo(s) uploaded successfully! Thank you for sharing your memories.`);
     }
     if (errorCount > 0 && successCount === 0) {
-      toast.error('No photos were uploaded. Please try again.', {
-        description: lastErrorMessage,
-      });
+      toast.error('No photos were uploaded. Please try again.');
     }
   };
 
