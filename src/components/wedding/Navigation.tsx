@@ -57,7 +57,9 @@ const Navigation = () => {
               className={`transition-all duration-300 ${
                 isScrolled ? 'h-10 w-10' : 'h-12 w-12'
               }`}
-              style={{ filter: isScrolled ? 'invert(0)' : 'invert(0)' }}
+              style={{ 
+                filter: 'sepia(100%) saturate(300%) brightness(90%) hue-rotate(-10deg)'
+              }}
             />
           </a>
           
@@ -99,7 +101,14 @@ const Navigation = () => {
         }`}
       >
         <div className="flex flex-col items-center justify-center h-full gap-8">
-          <img src={fsLogo} alt="F & S" className="h-20 w-20 mb-4" />
+          <img 
+            src={fsLogo} 
+            alt="F & S" 
+            className="h-20 w-20 mb-4" 
+            style={{ 
+              filter: 'sepia(100%) saturate(300%) brightness(90%) hue-rotate(-10deg)'
+            }}
+          />
           {navLinks.map((link, index) => (
             <a
               key={link.href}
