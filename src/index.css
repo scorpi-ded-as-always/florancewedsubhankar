@@ -46,6 +46,8 @@
     --forest: 150 40% 25%;
     --peach: 25 60% 85%;
     --terracotta: 15 50% 55%;
+    --haldi: 45 90% 45%; /* Yellow for haldi */
+    --haldi-foreground: 45 100% 10%;
     
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;

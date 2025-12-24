@@ -67,6 +67,10 @@ export default {
         forest: "hsl(var(--forest))",
         peach: "hsl(var(--peach))",
         terracotta: "hsl(var(--terracotta))",
+        haldi: {
+          DEFAULT: "hsl(var(--haldi))",
+          foreground: "hsl(var(--haldi-foreground))",
+        },
       },
       fontFamily: {
         serif: ['Cormorant Garamond', 'Georgia', 'serif'],
