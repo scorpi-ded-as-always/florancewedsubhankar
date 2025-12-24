@@ -14,12 +14,6 @@ const scheduleItems = [
     icon: Church,
   },
   {
-    time: "12:00 PM",
-    title: "Luncheon",
-    description: "Celebratory lunch at Cathedral Hall",
-    icon: Utensils,
-  },
-  {
     time: "5:30 PM",
     title: "Baraat Welcome",
     description: "Traditional groom's procession",
