@@ -3,7 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Download, RefreshCw, Image, Lock, Trash2 } from "lucide-react";
+import { Download, RefreshCw, Image, Lock, Trash2, Archive } from "lucide-react";
+import JSZip from "jszip";
 
 interface PhotoFile {
   name: string;
@@ -20,6 +21,7 @@ const Admin = () => {
   const [password, setPassword] = useState("");
   const [photos, setPhotos] = useState<PhotoFile[]>([]);
   const [loading, setLoading] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [selectedPhotos, setSelectedPhotos] = useState<Set<string>>(new Set());
 
   // Simple password check - in production, use proper auth
@@ -103,14 +105,62 @@ const Admin = () => {
     }
   };
 
-  const downloadAllPhotos = async () => {
-    toast.info(`Downloading ${photos.length} photos...`);
-    for (const photo of photos) {
-      await downloadPhoto(photo.name);
-      // Small delay to prevent overwhelming the browser
-      await new Promise((r) => setTimeout(r, 300));
+  const downloadAsZip = async (photosToDownload: PhotoFile[], zipName: string) => {
+    if (photosToDownload.length === 0) return;
+    
+    setDownloading(true);
+    const zip = new JSZip();
+    
+    try {
+      toast.info(`Preparing ${photosToDownload.length} photos for download...`);
+      
+      let completed = 0;
+      for (const photo of photosToDownload) {
+        try {
+          const { data, error } = await supabase.storage
+            .from("photo-dump")
+            .download(photo.name);
+
+          if (error) {
+            console.error(`Failed to download ${photo.name}:`, error);
+            continue;
+          }
+
+          zip.file(photo.name, data);
+          completed++;
+          
+          // Update progress every 5 photos
+          if (completed % 5 === 0) {
+            toast.info(`Downloaded ${completed}/${photosToDownload.length} photos...`);
+          }
+        } catch (err) {
+          console.error(`Error downloading ${photo.name}:`, err);
+        }
+      }
+
+      toast.info("Creating zip file...");
+      const content = await zip.generateAsync({ type: "blob" });
+      
+      const url = URL.createObjectURL(content);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = zipName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast.success(`${completed} photos downloaded as ${zipName}`);
+    } catch (error) {
+      console.error("Zip creation error:", error);
+      toast.error("Failed to create zip file");
+    } finally {
+      setDownloading(false);
     }
-    toast.success("All photos downloaded!");
+  };
+
+  const downloadAllPhotos = async () => {
+    await downloadAsZip(photos, "wedding-photos.zip");
   };
 
   const deletePhoto = async (fileName: string) => {
@@ -145,12 +195,7 @@ const Admin = () => {
 
   const downloadSelected = async () => {
     const toDownload = photos.filter((p) => selectedPhotos.has(p.name));
-    toast.info(`Downloading ${toDownload.length} photos...`);
-    for (const photo of toDownload) {
-      await downloadPhoto(photo.name);
-      await new Promise((r) => setTimeout(r, 300));
-    }
-    toast.success("Selected photos downloaded!");
+    await downloadAsZip(toDownload, "selected-photos.zip");
   };
 
   const formatFileSize = (bytes?: number) => {
@@ -219,14 +264,14 @@ const Admin = () => {
               Refresh
             </Button>
             {selectedPhotos.size > 0 && (
-              <Button variant="outline" onClick={downloadSelected}>
-                <Download className="w-4 h-4 mr-2" />
-                Download Selected ({selectedPhotos.size})
+              <Button variant="outline" onClick={downloadSelected} disabled={downloading}>
+                <Archive className="w-4 h-4 mr-2" />
+                {downloading ? "Creating ZIP..." : `Download Selected (${selectedPhotos.size})`}
               </Button>
             )}
-            <Button onClick={downloadAllPhotos} disabled={photos.length === 0}>
-              <Download className="w-4 h-4 mr-2" />
-              Download All
+            <Button onClick={downloadAllPhotos} disabled={photos.length === 0 || downloading}>
+              <Archive className="w-4 h-4 mr-2" />
+              {downloading ? "Creating ZIP..." : "Download All (.zip)"}
             </Button>
           </div>
         </div>
