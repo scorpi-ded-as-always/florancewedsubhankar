@@ -58,7 +58,7 @@ const Navigation = () => {
                 isScrolled ? 'h-10 w-10' : 'h-12 w-12'
               }`}
               style={{ 
-                filter: 'sepia(100%) saturate(300%) brightness(90%) hue-rotate(-10deg)'
+                filter: 'sepia(100%) saturate(400%) brightness(60%) hue-rotate(-10deg)'
               }}
             />
           </a>
@@ -106,7 +106,7 @@ const Navigation = () => {
             alt="F & S" 
             className="h-20 w-20 mb-4" 
             style={{ 
-              filter: 'sepia(100%) saturate(300%) brightness(90%) hue-rotate(-10deg)'
+              filter: 'sepia(100%) saturate(400%) brightness(60%) hue-rotate(-10deg)'
             }}
           />
           {navLinks.map((link, index) => (
