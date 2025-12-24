@@ -3,20 +3,20 @@ import { Button } from "@/components/ui/button";
 
 const venues = [
   {
-    name: "St. Thomas Cathedral",
+    name: "Krishnagar Cathedral Church",
     type: "Catholic Wedding",
-    address: "123 Church Street, Bandra West, Mumbai 400050",
+    address: "Krishnagar, West Bengal",
     icon: Church,
-    mapUrl: "https://maps.google.com/?q=St+Thomas+Cathedral+Mumbai",
-    embedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3771.2!2d72.83!3d19.05!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTnCsDAzJzAwLjAiTiA3MsKwNDknNDguMCJF!5e0!3m2!1sen!2sin!4v1234567890"
+    mapUrl: "https://maps.google.com/?q=Krishnagar+Cathedral+Church",
+    embedUrl: ""
   },
   {
-    name: "The Grand Pavilion",
+    name: "XYZ Lodge",
     type: "Hindu Wedding",
-    address: "456 Heritage Lane, Juhu, Mumbai 400049",
+    address: "Krishnagar, West Bengal",
     icon: Sparkles,
-    mapUrl: "https://maps.google.com/?q=Grand+Pavilion+Juhu+Mumbai",
-    embedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3770.5!2d72.82!3d19.10!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTnCsDA2JzAwLjAiTiA3MsKwNDknMTIuMCJF!5e0!3m2!1sen!2sin!4v1234567890"
+    mapUrl: "https://maps.google.com/?q=XYZ+Lodge+Krishnagar",
+    embedUrl: ""
   }
 ];
 
