@@ -16,6 +16,41 @@ interface UploadedFile {
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 
+// Extract first frame from video as thumbnail
+const extractVideoThumbnail = (file: File): Promise<string> => {
+  return new Promise((resolve) => {
+    const video = document.createElement('video');
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    video.preload = 'metadata';
+    video.muted = true;
+    video.playsInline = true;
+    
+    video.onloadeddata = () => {
+      // Seek to first frame
+      video.currentTime = 0.1;
+    };
+    
+    video.onseeked = () => {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      const thumbnailUrl = canvas.toDataURL('image/jpeg', 0.8);
+      URL.revokeObjectURL(video.src);
+      resolve(thumbnailUrl);
+    };
+    
+    video.onerror = () => {
+      // Fallback to blob URL if thumbnail extraction fails
+      resolve(URL.createObjectURL(file));
+    };
+    
+    video.src = URL.createObjectURL(file);
+  });
+};
+
 const PhotoDump = () => {
   const [guestName, setGuestName] = useState("");
   const [files, setFiles] = useState<UploadedFile[]>([]);
@@ -25,10 +60,11 @@ const PhotoDump = () => {
     return file.type.startsWith('video/');
   };
 
-  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []);
     
-    const validFiles: UploadedFile[] = [];
+    // Reset the input so the same file can be selected again
+    e.target.value = '';
     
     for (const file of selectedFiles) {
       if (file.size > MAX_FILE_SIZE) {
@@ -36,20 +72,29 @@ const PhotoDump = () => {
         continue;
       }
       
-      validFiles.push({
-        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      const isVideo = isVideoFile(file);
+      const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      
+      // Add file immediately with loading preview for videos
+      const initialPreview = isVideo ? '' : URL.createObjectURL(file);
+      
+      setFiles(prev => [...prev, {
+        id,
         file,
-        preview: URL.createObjectURL(file),
+        preview: initialPreview,
         status: 'pending' as const,
         progress: 0,
-        isVideo: isVideoFile(file)
-      });
+        isVideo
+      }]);
+      
+      // Extract thumbnail for videos asynchronously
+      if (isVideo) {
+        const thumbnail = await extractVideoThumbnail(file);
+        setFiles(prev => prev.map(f => 
+          f.id === id ? { ...f, preview: thumbnail } : f
+        ));
+      }
     }
-
-    setFiles(prev => [...prev, ...validFiles]);
-    
-    // Reset the input so the same file can be selected again
-    e.target.value = '';
   }, []);
 
   const removeFile = (id: string) => {
@@ -282,24 +327,23 @@ const PhotoDump = () => {
               <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                 {files.map((file) => (
                   <div key={file.id} className="relative aspect-square rounded-lg overflow-hidden group">
-                    {file.isVideo ? (
-                      <video
-                        src={file.preview}
-                        className="w-full h-full object-cover"
-                        muted
-                      />
-                    ) : (
+                    {file.preview ? (
                       <img
                         src={file.preview}
                         alt="Preview"
                         className="w-full h-full object-cover"
                       />
+                    ) : (
+                      <div className="w-full h-full bg-muted flex items-center justify-center">
+                        <Loader2 className="w-6 h-6 text-muted-foreground animate-spin" />
+                      </div>
                     )}
                     
                     {/* Video indicator */}
-                    {file.isVideo && file.status === 'pending' && (
-                      <div className="absolute top-2 right-2 bg-black/60 rounded px-1.5 py-0.5">
+                    {file.isVideo && (
+                      <div className="absolute top-2 right-2 bg-black/60 rounded px-1.5 py-0.5 flex items-center gap-1">
                         <Video className="w-3 h-3 text-white" />
+                        <span className="text-[10px] text-white font-medium">VIDEO</span>
                       </div>
                     )}
                     
