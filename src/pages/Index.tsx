@@ -5,6 +5,7 @@ import WeddingDetails from "@/components/wedding/WeddingDetails";
 import Schedule from "@/components/wedding/Schedule";
 import CalendarSection from "@/components/wedding/CalendarSection";
 import Gallery from "@/components/wedding/Gallery";
+import PhotoDump from "@/components/wedding/PhotoDump";
 import LocationMap from "@/components/wedding/LocationMap";
 import Footer from "@/components/wedding/Footer";
 
@@ -18,6 +19,7 @@ const Index = () => {
       <Schedule />
       <CalendarSection />
       <Gallery />
+      <PhotoDump />
       <LocationMap />
       <Footer />
     </main>
