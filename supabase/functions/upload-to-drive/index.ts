@@ -13,6 +13,14 @@ function base64UrlEncode(input: string) {
   return btoa(input).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
 }
 
+function mimeTypeFromName(name: string): string {
+  const ext = name.split(".").pop()?.toLowerCase();
+  if (ext === "png") return "image/png";
+  if (ext === "webp") return "image/webp";
+  if (ext === "gif") return "image/gif";
+  return "image/jpeg";
+}
+
 async function getAccessToken(serviceAccountKey: string): Promise<string> {
   const key = JSON.parse(serviceAccountKey);
 
@@ -20,8 +28,7 @@ async function getAccessToken(serviceAccountKey: string): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   const payload = {
     iss: key.client_email,
-    // NOTE: drive.file can be too restrictive for server-to-server uploads into an existing folder.
-    // Using full Drive scope for reliability.
+    // Full Drive scope for server-to-server uploads into Shared Drives
     scope: "https://www.googleapis.com/auth/drive",
     aud: "https://oauth2.googleapis.com/token",
     exp: now + 3600,
@@ -75,6 +82,33 @@ async function getAccessToken(serviceAccountKey: string): Promise<string> {
   return tokenData.access_token;
 }
 
+async function assertSharedDriveFolder(accessToken: string, folderId: string) {
+  const res = await fetch(
+    `https://www.googleapis.com/drive/v3/files/${folderId}?fields=id,name,driveId&supportsAllDrives=true`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
+
+  const text = await res.text();
+  if (!res.ok) {
+    throw new Error(
+      `Could not access the configured Drive folder. Make sure the service account has access. Details: ${text}`
+    );
+  }
+
+  const data = JSON.parse(text) as { id: string; name?: string; driveId?: string };
+  console.log(`Drive folder check: name=${data.name ?? "(unknown)"}, driveId=${data.driveId ?? "(none)"}`);
+
+  if (!data.driveId) {
+    throw new Error(
+      'The configured folder is not inside a Shared Drive. Service accounts cannot upload into regular "My Drive" folders because they have no storage quota. Move/create this folder inside a Shared Drive and update the folder ID.'
+    );
+  }
+}
+
 async function uploadToDrive(
   accessToken: string,
   fileName: string,
@@ -91,7 +125,7 @@ async function uploadToDrive(
   form.append("metadata", new Blob([JSON.stringify(metadata)], { type: "application/json" }));
   form.append("file", fileBlob, fileName);
 
-  // supportsAllDrives is required for Shared Drives.
+  // supportsAllDrives is required for Shared Drives
   const response = await fetch(
     "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&supportsAllDrives=true",
     {
@@ -150,6 +184,9 @@ serve(async (req) => {
     const accessToken = await getAccessToken(serviceAccountKey);
     console.log("Got Google access token");
 
+    // Make the failure mode explicit: shared drive required
+    await assertSharedDriveFolder(accessToken, DRIVE_FOLDER_ID);
+
     const finalFileName = guestName ? `${guestName}_${fileName}` : fileName;
 
     const driveResult = await uploadToDrive(
@@ -184,11 +221,3 @@ serve(async (req) => {
     });
   }
 });
-
-function mimeTypeFromName(name: string): string {
-  const ext = name.split(".").pop()?.toLowerCase();
-  if (ext === "png") return "image/png";
-  if (ext === "webp") return "image/webp";
-  if (ext === "gif") return "image/gif";
-  return "image/jpeg";
-}

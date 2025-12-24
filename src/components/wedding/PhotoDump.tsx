@@ -52,6 +52,7 @@ const PhotoDump = () => {
 
     let successCount = 0;
     let errorCount = 0;
+    let lastErrorMessage: string | undefined;
 
     for (const uploadedFile of files) {
       if (uploadedFile.status === 'success') continue;
@@ -99,6 +100,7 @@ const PhotoDump = () => {
         const message = error instanceof Error ? error.message : 'Upload failed';
         console.error('Upload error:', error);
         errorCount += 1;
+        lastErrorMessage = message;
 
         toast.error(`Couldn't upload ${uploadedFile.file.name}`, {
           description: message,
@@ -116,7 +118,9 @@ const PhotoDump = () => {
       toast.success(`${successCount} photo(s) uploaded successfully! Thank you for sharing your memories.`);
     }
     if (errorCount > 0 && successCount === 0) {
-      toast.error('No photos were uploaded. Please try again.');
+      toast.error('No photos were uploaded. Please try again.', {
+        description: lastErrorMessage,
+      });
     }
   };
 
