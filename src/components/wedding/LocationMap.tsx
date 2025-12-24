@@ -9,7 +9,7 @@ const venues = [
     date: "06 February, 2026 - Friday",
     address: "Cathedral Road, Krishnagar, Nadia - 741101",
     icon: Church,
-    mapUrl: "https://maps.google.com/?q=Krishnagar+Cathedral+Church+Cathedral+Road+Krishnagar+Nadia",
+    mapUrl: "https://maps.app.goo.gl/FSUNs95ijFguHGE4A",
   },
   {
     name: "Lodge Bhakti Bhawan",
