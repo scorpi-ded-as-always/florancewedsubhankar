@@ -107,6 +107,51 @@ const PhotoDump = () => {
     });
   };
 
+  const uploadFileWithProgress = (file: File, filePath: string, onProgress: (progress: number) => void): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      
+      const xhr = new XMLHttpRequest();
+      const url = `${supabaseUrl}/storage/v1/object/photo-dump/${filePath}`;
+      
+      xhr.upload.addEventListener('progress', (event) => {
+        if (event.lengthComputable) {
+          const percentComplete = Math.round((event.loaded / event.total) * 100);
+          onProgress(percentComplete);
+        }
+      });
+      
+      xhr.addEventListener('load', () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve();
+        } else {
+          try {
+            const response = JSON.parse(xhr.responseText);
+            reject(new Error(response.message || response.error || 'Upload failed'));
+          } catch {
+            reject(new Error(`Upload failed with status ${xhr.status}`));
+          }
+        }
+      });
+      
+      xhr.addEventListener('error', () => {
+        reject(new Error('Network error during upload'));
+      });
+      
+      xhr.addEventListener('abort', () => {
+        reject(new Error('Upload cancelled'));
+      });
+      
+      xhr.open('POST', url);
+      xhr.setRequestHeader('Authorization', `Bearer ${supabaseKey}`);
+      xhr.setRequestHeader('apikey', supabaseKey);
+      xhr.setRequestHeader('Content-Type', file.type);
+      xhr.setRequestHeader('x-upsert', 'false');
+      xhr.send(file);
+    });
+  };
+
   const uploadFiles = async () => {
     if (files.length === 0) {
       toast.error("Please select at least one file");
@@ -123,20 +168,22 @@ const PhotoDump = () => {
 
       try {
         setFiles(prev => prev.map(f => 
-          f.id === uploadedFile.id ? { ...f, status: 'uploading' as const } : f
+          f.id === uploadedFile.id ? { ...f, status: 'uploading' as const, progress: 0 } : f
         ));
 
         const fileExt = uploadedFile.file.name.split('.').pop();
         const guestPrefix = guestName.trim() ? `${guestName.trim().replace(/\s+/g, '-')}_` : '';
         const filePath = `${guestPrefix}${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
 
-        const { error: uploadError } = await supabase.storage
-          .from('photo-dump')
-          .upload(filePath, uploadedFile.file);
-
-        if (uploadError) {
-          throw new Error(uploadError.message);
-        }
+        await uploadFileWithProgress(
+          uploadedFile.file,
+          filePath,
+          (progress) => {
+            setFiles(prev => prev.map(f => 
+              f.id === uploadedFile.id ? { ...f, progress } : f
+            ));
+          }
+        );
 
         successCount += 1;
 
@@ -348,9 +395,9 @@ const PhotoDump = () => {
                     )}
                     
                     {/* Status overlay */}
-                    <div className={`absolute inset-0 flex items-center justify-center transition-opacity ${
+                    <div className={`absolute inset-0 flex flex-col items-center justify-center transition-opacity ${
                       file.status === 'pending' ? 'bg-transparent group-hover:bg-foreground/40' :
-                      file.status === 'uploading' ? 'bg-foreground/60' :
+                      file.status === 'uploading' ? 'bg-foreground/70' :
                       file.status === 'success' ? 'bg-green-500/60' :
                       'bg-red-500/60'
                     }`}>
@@ -363,7 +410,18 @@ const PhotoDump = () => {
                         </button>
                       )}
                       {file.status === 'uploading' && (
-                        <Loader2 className="w-6 h-6 text-background animate-spin" />
+                        <div className="flex flex-col items-center gap-2 px-3 w-full">
+                          <Loader2 className="w-5 h-5 text-background animate-spin" />
+                          <div className="w-full max-w-[80%] bg-background/30 rounded-full h-2 overflow-hidden">
+                            <div 
+                              className="h-full bg-primary transition-all duration-300 ease-out rounded-full"
+                              style={{ width: `${file.progress}%` }}
+                            />
+                          </div>
+                          <span className="text-xs text-background font-medium">
+                            {file.progress}%
+                          </span>
+                        </div>
                       )}
                       {file.status === 'success' && (
                         <Check className="w-6 h-6 text-background" />
