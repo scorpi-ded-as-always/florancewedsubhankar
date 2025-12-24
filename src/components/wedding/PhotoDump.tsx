@@ -50,6 +50,9 @@ const PhotoDump = () => {
 
     setIsUploading(true);
 
+    let successCount = 0;
+    let errorCount = 0;
+
     for (const uploadedFile of files) {
       if (uploadedFile.status === 'success') continue;
 
@@ -63,7 +66,7 @@ const PhotoDump = () => {
         const fileExt = uploadedFile.file.name.split('.').pop();
         const filePath = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
 
-        // Upload to Supabase storage
+        // Upload to storage
         const { error: uploadError } = await supabase.storage
           .from('photo-dump')
           .upload(filePath, uploadedFile.file);
@@ -72,7 +75,7 @@ const PhotoDump = () => {
           throw new Error(uploadError.message);
         }
 
-        // Trigger Google Drive upload via edge function
+        // Trigger Google Drive upload via backend function
         const { data, error: fnError } = await supabase.functions.invoke('upload-to-drive', {
           body: {
             filePath,
@@ -85,13 +88,22 @@ const PhotoDump = () => {
           throw new Error(fnError?.message || data?.error || 'Upload failed');
         }
 
+        successCount += 1;
+
         // Update status to success
         setFiles(prev => prev.map(f => 
           f.id === uploadedFile.id ? { ...f, status: 'success' as const, progress: 100 } : f
         ));
 
       } catch (error) {
+        const message = error instanceof Error ? error.message : 'Upload failed';
         console.error('Upload error:', error);
+        errorCount += 1;
+
+        toast.error(`Couldn't upload ${uploadedFile.file.name}`, {
+          description: message,
+        });
+
         setFiles(prev => prev.map(f => 
           f.id === uploadedFile.id ? { ...f, status: 'error' as const } : f
         ));
@@ -99,10 +111,12 @@ const PhotoDump = () => {
     }
 
     setIsUploading(false);
-    
-    const successCount = files.filter(f => f.status === 'success').length;
+
     if (successCount > 0) {
       toast.success(`${successCount} photo(s) uploaded successfully! Thank you for sharing your memories.`);
+    }
+    if (errorCount > 0 && successCount === 0) {
+      toast.error('No photos were uploaded. Please try again.');
     }
   };
 
