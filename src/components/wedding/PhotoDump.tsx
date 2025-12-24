@@ -155,22 +155,23 @@ const PhotoDump = () => {
             />
           </div>
 
-          {/* Drop zone */}
+          {/* Camera capture */}
           <label className="block cursor-pointer">
             <div className="border-2 border-dashed border-primary/30 rounded-xl p-8 md:p-12 text-center hover:border-primary/60 transition-colors bg-background/50">
               <input
                 type="file"
                 accept="image/*"
+                capture="environment"
                 multiple
                 onChange={handleFileSelect}
                 className="hidden"
               />
-              <Upload className="w-12 h-12 mx-auto mb-4 text-primary/50" />
+              <Camera className="w-12 h-12 mx-auto mb-4 text-primary/50" />
               <p className="text-lg font-medium text-foreground mb-2">
-                Tap to select photos
+                Tap to open camera
               </p>
               <p className="text-sm text-muted-foreground">
-                or drag and drop your images here
+                Take a photo to share with the couple
               </p>
               <p className="text-xs text-muted-foreground mt-2">
                 JPG, PNG, WebP • Max 10MB each
