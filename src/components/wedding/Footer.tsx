@@ -33,7 +33,7 @@ const Footer = () => {
         
         {/* Date */}
         <p className="font-sans text-sm uppercase tracking-[0.3em] text-accent-foreground/60 mb-8">
-          February 14, 2025
+          February 6, 2026
         </p>
         
         {/* Decorative dots */}
