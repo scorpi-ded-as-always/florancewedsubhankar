@@ -19,7 +19,6 @@ const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [photos, setPhotos] = useState<PhotoFile[]>([]);
-  const [photoUrls, setPhotoUrls] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [selectedPhotos, setSelectedPhotos] = useState<Set<string>>(new Set());
 
@@ -62,21 +61,9 @@ const Admin = () => {
 
       if (error) throw error;
       
-      const photoList = data || [];
+      // Filter out any placeholder/empty files
+      const photoList = (data || []).filter(file => file.name && !file.name.startsWith('.'));
       setPhotos(photoList);
-      
-      // Generate signed URLs for all photos
-      const urls: Record<string, string> = {};
-      for (const photo of photoList) {
-        const { data: signedData } = await supabase.storage
-          .from("photo-dump")
-          .createSignedUrl(photo.name, 3600); // 1 hour expiry
-        
-        if (signedData?.signedUrl) {
-          urls[photo.name] = signedData.signedUrl;
-        }
-      }
-      setPhotoUrls(urls);
     } catch (error) {
       console.error("Error fetching photos:", error);
       toast.error("Failed to fetch photos");
@@ -86,7 +73,10 @@ const Admin = () => {
   };
 
   const getPhotoUrl = (fileName: string) => {
-    return photoUrls[fileName] || "";
+    const { data } = supabase.storage
+      .from("photo-dump")
+      .getPublicUrl(fileName);
+    return data.publicUrl;
   };
 
   const downloadPhoto = async (fileName: string) => {
