@@ -9,7 +9,7 @@ const venues = [
     date: "06 February, 2026 - Friday",
     address: "Cathedral Road, Krishnagar, Nadia - 741101",
     icon: Church,
-    mapUrl: "https://maps.app.goo.gl/FSUNs95ijFguHGE4A",
+    mapUrl: "https://maps.google.com/?q=Krishnagar+Cathedral+Church+Cathedral+Road+Krishnagar+Nadia+741101",
   },
   {
     name: "Lodge Bhakti Bhawan",
@@ -18,7 +18,7 @@ const venues = [
     date: "06 February, 2026 - Friday",
     address: "D.L. Roy Road, Bowbazar, Krishnagar, Nadia - 741101",
     icon: Sparkles,
-    mapUrl: "https://maps.google.com/?q=Lodge+Bhakti+Bhawan+DL+Roy+Road+Bowbazar+Krishnagar+Nadia",
+    mapUrl: "https://maps.google.com/?q=Lodge+Bhakti+Bhawan+D.L.+Roy+Road+Bowbazar+Krishnagar+Nadia+741101",
   }
 ];
 
