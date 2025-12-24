@@ -81,10 +81,10 @@ const HeroSection = () => {
         {/* Date and location */}
         <div className="space-y-3 opacity-0 animate-fade-up animation-delay-600">
           <p className="font-sans text-lg md:text-xl tracking-[0.3em] uppercase text-foreground/80">
-            February 14, 2025
+            February 6, 2026
           </p>
           <p className="font-sans text-base md:text-lg text-muted-foreground">
-            Mumbai, India
+            Krishnagar, India
           </p>
         </div>
         

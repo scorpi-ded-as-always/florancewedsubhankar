@@ -163,7 +163,7 @@ const CalendarSection = () => {
                     : isWeddingDay(day)
                       ? 'bg-primary text-primary-foreground shadow-lg transform scale-110 ring-4 ring-primary/30'
                       : isHaldiDay(day)
-                        ? 'bg-accent text-accent-foreground shadow-md ring-2 ring-accent/30'
+                        ? 'bg-haldi text-haldi-foreground shadow-md ring-2 ring-haldi/30'
                         : 'hover:bg-secondary'
                 }`}
               >
@@ -181,7 +181,7 @@ const CalendarSection = () => {
           {/* Wedding date highlight */}
           <div className="mt-8 text-center space-y-2">
             <p className="font-serif text-base text-foreground">
-              February 5, 2026 — <span className="text-accent">Haldi Ceremony</span>
+              February 5, 2026 — <span className="text-haldi font-medium">Haldi Ceremony</span>
             </p>
             <p className="font-serif text-lg text-foreground">
               February 6, 2026 — <span className="text-primary">Our Wedding Day</span>
