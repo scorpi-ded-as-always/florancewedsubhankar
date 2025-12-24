@@ -5,18 +5,20 @@ const venues = [
   {
     name: "Krishnagar Cathedral Church",
     type: "Catholic Wedding",
-    address: "Krishnagar, West Bengal",
+    time: "From 10:00 AM",
+    date: "06 February, 2026 - Friday",
+    address: "Cathedral Road, Krishnagar, Nadia - 741101",
     icon: Church,
-    mapUrl: "https://maps.google.com/?q=Krishnagar+Cathedral+Church",
-    embedUrl: ""
+    mapUrl: "https://maps.google.com/?q=Krishnagar+Cathedral+Church+Cathedral+Road+Krishnagar+Nadia",
   },
   {
-    name: "XYZ Lodge",
+    name: "Lodge Bhakti Bhawan",
     type: "Hindu Wedding",
-    address: "Krishnagar, West Bengal",
+    time: "From 10:15 PM",
+    date: "06 February, 2026 - Friday",
+    address: "D.L. Roy Road, Bowbazar, Krishnagar, Nadia - 741101",
     icon: Sparkles,
-    mapUrl: "https://maps.google.com/?q=XYZ+Lodge+Krishnagar",
-    embedUrl: ""
+    mapUrl: "https://maps.google.com/?q=Lodge+Bhakti+Bhawan+DL+Roy+Road+Bowbazar+Krishnagar+Nadia",
   }
 ];
 
@@ -71,7 +73,10 @@ const LocationMap = () => {
                     <h3 className="font-serif text-2xl font-light text-foreground mt-1">
                       {venue.name}
                     </h3>
-                    <p className="font-sans text-sm text-muted-foreground mt-2">
+                    <p className="font-sans text-sm font-medium text-foreground/80 mt-2">
+                      {venue.time} • {venue.date}
+                    </p>
+                    <p className="font-sans text-sm text-muted-foreground mt-1">
                       {venue.address}
                     </p>
                   </div>
