@@ -10,6 +10,7 @@ const venues = [
     address: "Cathedral Road, Krishnagar, Nadia - 741101",
     icon: Church,
     mapUrl: "https://maps.google.com/?q=Krishnagar+Cathedral+Church+Cathedral+Road+Krishnagar+Nadia+741101",
+    embedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3661.4832888663695!2d88.48655459999999!3d23.4069029!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39f92024904875af%3A0xe6bb2f933b60224e!2sKrishnanagar%20Cathedral%20Church!5e0!3m2!1sen!2sin!4v1766591306453!5m2!1sen!2sin",
   },
   {
     name: "Lodge Bhakti Bhawan",
@@ -19,6 +20,7 @@ const venues = [
     address: "D.L. Roy Road, Bowbazar, Krishnagar, Nadia - 741101",
     icon: Sparkles,
     mapUrl: "https://maps.google.com/?q=Lodge+Bhakti+Bhawan+D.L.+Roy+Road+Bowbazar+Krishnagar+Nadia+741101",
+    embedUrl: "",
   }
 ];
 
@@ -48,16 +50,29 @@ const LocationMap = () => {
               key={index}
               className="bg-card rounded-2xl overflow-hidden elegant-border shadow-lg hover:shadow-xl transition-shadow duration-300"
             >
-              {/* Map placeholder */}
-              <div className="relative h-64 bg-secondary">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <MapPin className="w-12 h-12 mx-auto mb-2 text-primary/30" />
-                    <p className="text-sm font-sans text-muted-foreground/50">Map Preview</p>
+              {/* Map embed or placeholder */}
+              <div className="relative h-64 bg-secondary overflow-hidden">
+                {venue.embedUrl ? (
+                  <iframe
+                    src={venue.embedUrl}
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title={`Map of ${venue.name}`}
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center">
+                      <MapPin className="w-12 h-12 mx-auto mb-2 text-primary/30" />
+                      <p className="text-sm font-sans text-muted-foreground/50">Map Preview</p>
+                    </div>
                   </div>
-                </div>
+                )}
                 {/* Decorative gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent pointer-events-none" />
               </div>
               
               {/* Venue info */}
