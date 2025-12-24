@@ -3,10 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Download, RefreshCw, Image, Lock, Trash2, Archive } from "lucide-react";
+import { Download, RefreshCw, Image, Lock, Trash2, Archive, X, Play } from "lucide-react";
 import JSZip from "jszip";
 
-interface PhotoFile {
+interface MediaFile {
   name: string;
   id: string;
   created_at: string;
@@ -19,10 +19,11 @@ interface PhotoFile {
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
-  const [photos, setPhotos] = useState<PhotoFile[]>([]);
+  const [media, setMedia] = useState<MediaFile[]>([]);
   const [loading, setLoading] = useState(false);
   const [downloading, setDownloading] = useState(false);
-  const [selectedPhotos, setSelectedPhotos] = useState<Set<string>>(new Set());
+  const [selectedMedia, setSelectedMedia] = useState<Set<string>>(new Set());
+  const [lightboxItem, setLightboxItem] = useState<MediaFile | null>(null);
 
   // Simple password check - in production, use proper auth
   const ADMIN_PASSWORD = "wedding2025";
@@ -39,7 +40,6 @@ const Admin = () => {
   };
 
   useEffect(() => {
-    // Check session
     if (sessionStorage.getItem("admin_auth") === "true") {
       setIsAuthenticated(true);
     }
@@ -47,11 +47,16 @@ const Admin = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      fetchPhotos();
+      fetchMedia();
     }
   }, [isAuthenticated]);
 
-  const fetchPhotos = async () => {
+  const isVideo = (fileName: string) => {
+    const ext = fileName.split('.').pop()?.toLowerCase();
+    return ['mp4', 'mov', 'webm', 'avi', 'mkv'].includes(ext || '');
+  };
+
+  const fetchMedia = async () => {
     setLoading(true);
     try {
       const { data, error } = await supabase.storage
@@ -63,25 +68,24 @@ const Admin = () => {
 
       if (error) throw error;
       
-      // Filter out any placeholder/empty files
-      const photoList = (data || []).filter(file => file.name && !file.name.startsWith('.'));
-      setPhotos(photoList);
+      const mediaList = (data || []).filter(file => file.name && !file.name.startsWith('.'));
+      setMedia(mediaList);
     } catch (error) {
-      console.error("Error fetching photos:", error);
-      toast.error("Failed to fetch photos");
+      console.error("Error fetching media:", error);
+      toast.error("Failed to fetch media");
     } finally {
       setLoading(false);
     }
   };
 
-  const getPhotoUrl = (fileName: string) => {
+  const getMediaUrl = (fileName: string) => {
     const { data } = supabase.storage
       .from("photo-dump")
       .getPublicUrl(fileName);
     return data.publicUrl;
   };
 
-  const downloadPhoto = async (fileName: string) => {
+  const downloadItem = async (fileName: string) => {
     try {
       const { data, error } = await supabase.storage
         .from("photo-dump")
@@ -101,40 +105,39 @@ const Admin = () => {
       toast.success(`Downloaded ${fileName}`);
     } catch (error) {
       console.error("Download error:", error);
-      toast.error("Failed to download photo");
+      toast.error("Failed to download");
     }
   };
 
-  const downloadAsZip = async (photosToDownload: PhotoFile[], zipName: string) => {
-    if (photosToDownload.length === 0) return;
+  const downloadAsZip = async (itemsToDownload: MediaFile[], zipName: string) => {
+    if (itemsToDownload.length === 0) return;
     
     setDownloading(true);
     const zip = new JSZip();
     
     try {
-      toast.info(`Preparing ${photosToDownload.length} photos for download...`);
+      toast.info(`Preparing ${itemsToDownload.length} files for download...`);
       
       let completed = 0;
-      for (const photo of photosToDownload) {
+      for (const item of itemsToDownload) {
         try {
           const { data, error } = await supabase.storage
             .from("photo-dump")
-            .download(photo.name);
+            .download(item.name);
 
           if (error) {
-            console.error(`Failed to download ${photo.name}:`, error);
+            console.error(`Failed to download ${item.name}:`, error);
             continue;
           }
 
-          zip.file(photo.name, data);
+          zip.file(item.name, data);
           completed++;
           
-          // Update progress every 5 photos
           if (completed % 5 === 0) {
-            toast.info(`Downloaded ${completed}/${photosToDownload.length} photos...`);
+            toast.info(`Downloaded ${completed}/${itemsToDownload.length} files...`);
           }
         } catch (err) {
-          console.error(`Error downloading ${photo.name}:`, err);
+          console.error(`Error downloading ${item.name}:`, err);
         }
       }
 
@@ -150,7 +153,7 @@ const Admin = () => {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      toast.success(`${completed} photos downloaded as ${zipName}`);
+      toast.success(`${completed} files downloaded as ${zipName}`);
     } catch (error) {
       console.error("Zip creation error:", error);
       toast.error("Failed to create zip file");
@@ -159,13 +162,11 @@ const Admin = () => {
     }
   };
 
-  const downloadAllPhotos = async () => {
-    await downloadAsZip(photos, "wedding-photos.zip");
+  const downloadAll = async () => {
+    await downloadAsZip(media, "wedding-media.zip");
   };
 
-  const deletePhoto = async (fileName: string) => {
-    if (!confirm(`Delete ${fileName}?`)) return;
-
+  const deleteItem = async (fileName: string) => {
     try {
       const { error } = await supabase.storage
         .from("photo-dump")
@@ -173,16 +174,17 @@ const Admin = () => {
 
       if (error) throw error;
 
-      setPhotos((prev) => prev.filter((p) => p.name !== fileName));
-      toast.success("Photo deleted");
+      setMedia((prev) => prev.filter((p) => p.name !== fileName));
+      setLightboxItem(null);
+      toast.success("Deleted successfully");
     } catch (error) {
       console.error("Delete error:", error);
-      toast.error("Failed to delete photo");
+      toast.error("Failed to delete");
     }
   };
 
   const toggleSelect = (name: string) => {
-    setSelectedPhotos((prev) => {
+    setSelectedMedia((prev) => {
       const next = new Set(prev);
       if (next.has(name)) {
         next.delete(name);
@@ -194,15 +196,8 @@ const Admin = () => {
   };
 
   const downloadSelected = async () => {
-    const toDownload = photos.filter((p) => selectedPhotos.has(p.name));
-    await downloadAsZip(toDownload, "selected-photos.zip");
-  };
-
-  const formatFileSize = (bytes?: number) => {
-    if (!bytes) return "Unknown size";
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    const toDownload = media.filter((p) => selectedMedia.has(p.name));
+    await downloadAsZip(toDownload, "selected-media.zip");
   };
 
   const formatDate = (dateStr: string) => {
@@ -213,6 +208,11 @@ const Admin = () => {
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  const openLightbox = (item: MediaFile, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setLightboxItem(item);
   };
 
   if (!isAuthenticated) {
@@ -227,7 +227,7 @@ const Admin = () => {
             </div>
             <h1 className="text-2xl font-serif text-center mb-2">Admin Access</h1>
             <p className="text-muted-foreground text-center text-sm mb-6">
-              Enter password to view uploaded photos
+              Enter password to view uploaded media
             </p>
             <form onSubmit={handleLogin} className="space-y-4">
               <Input
@@ -238,7 +238,7 @@ const Admin = () => {
                 className="text-center"
               />
               <Button type="submit" className="w-full">
-                Access Photos
+                Access Media
               </Button>
             </form>
           </div>
@@ -253,92 +253,84 @@ const Admin = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-serif text-foreground">Photo Admin</h1>
+            <h1 className="text-3xl font-serif text-foreground">Media Admin</h1>
             <p className="text-muted-foreground">
-              {photos.length} photo(s) uploaded
+              {media.length} file(s) uploaded
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" onClick={fetchPhotos} disabled={loading}>
+            <Button variant="outline" onClick={fetchMedia} disabled={loading}>
               <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
               Refresh
             </Button>
-            {selectedPhotos.size > 0 && (
+            {selectedMedia.size > 0 && (
               <Button variant="outline" onClick={downloadSelected} disabled={downloading}>
                 <Archive className="w-4 h-4 mr-2" />
-                {downloading ? "Creating ZIP..." : `Download Selected (${selectedPhotos.size})`}
+                {downloading ? "Creating ZIP..." : `Download Selected (${selectedMedia.size})`}
               </Button>
             )}
-            <Button onClick={downloadAllPhotos} disabled={photos.length === 0 || downloading}>
+            <Button onClick={downloadAll} disabled={media.length === 0 || downloading}>
               <Archive className="w-4 h-4 mr-2" />
               {downloading ? "Creating ZIP..." : "Download All (.zip)"}
             </Button>
           </div>
         </div>
 
-        {/* Photos grid */}
-        {photos.length === 0 ? (
+        {/* Media grid */}
+        {media.length === 0 ? (
           <div className="text-center py-20">
             <Image className="w-16 h-16 mx-auto mb-4 text-muted-foreground/30" />
-            <p className="text-muted-foreground">No photos uploaded yet</p>
+            <p className="text-muted-foreground">No media uploaded yet</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-            {photos.map((photo) => (
+            {media.map((item) => (
               <div
-                key={photo.id}
+                key={item.id}
                 className={`group relative aspect-square rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
-                  selectedPhotos.has(photo.name)
+                  selectedMedia.has(item.name)
                     ? "border-primary ring-2 ring-primary/20"
                     : "border-transparent hover:border-primary/30"
                 }`}
-                onClick={() => toggleSelect(photo.name)}
+                onClick={(e) => openLightbox(item, e)}
               >
-                <img
-                  src={getPhotoUrl(photo.name)}
-                  alt={photo.name}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-
-                {/* Overlay */}
-                <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/40 transition-colors flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
-                  <Button
-                    size="icon"
-                    variant="secondary"
-                    className="h-8 w-8"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      downloadPhoto(photo.name);
-                    }}
-                  >
-                    <Download className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="destructive"
-                    className="h-8 w-8"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deletePhoto(photo.name);
-                    }}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-
-                {/* Selection indicator */}
-                {selectedPhotos.has(photo.name) && (
-                  <div className="absolute top-2 left-2 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                    <span className="text-xs text-primary-foreground font-bold">✓</span>
+                {isVideo(item.name) ? (
+                  <div className="w-full h-full bg-muted flex items-center justify-center">
+                    <Play className="w-12 h-12 text-primary" />
                   </div>
+                ) : (
+                  <img
+                    src={getMediaUrl(item.name)}
+                    alt={item.name}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
                 )}
+
+                {/* Selection checkbox */}
+                <div 
+                  className="absolute top-2 left-2 z-10"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleSelect(item.name);
+                  }}
+                >
+                  <div className={`w-5 h-5 rounded-full flex items-center justify-center border-2 ${
+                    selectedMedia.has(item.name) 
+                      ? "bg-primary border-primary" 
+                      : "bg-background/80 border-muted-foreground/50"
+                  }`}>
+                    {selectedMedia.has(item.name) && (
+                      <span className="text-xs text-primary-foreground font-bold">✓</span>
+                    )}
+                  </div>
+                </div>
 
                 {/* Info */}
                 <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-foreground/80 to-transparent">
-                  <p className="text-xs text-background truncate">{photo.name}</p>
+                  <p className="text-xs text-background truncate">{item.name}</p>
                   <p className="text-xs text-background/70">
-                    {formatDate(photo.created_at)}
+                    {formatDate(item.created_at)}
                   </p>
                 </div>
               </div>
@@ -346,6 +338,72 @@ const Admin = () => {
           </div>
         )}
       </div>
+
+      {/* Lightbox */}
+      {lightboxItem && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+          onClick={() => setLightboxItem(null)}
+        >
+          <div 
+            className="relative max-w-5xl max-h-[90vh] w-full flex flex-col items-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close button */}
+            <button 
+              onClick={() => setLightboxItem(null)}
+              className="absolute -top-12 right-0 text-white hover:text-primary transition-colors"
+            >
+              <X className="w-8 h-8" />
+            </button>
+
+            {/* Media */}
+            <div className="w-full flex-1 flex items-center justify-center overflow-hidden">
+              {isVideo(lightboxItem.name) ? (
+                <video 
+                  src={getMediaUrl(lightboxItem.name)} 
+                  controls 
+                  className="max-w-full max-h-[70vh] rounded-lg"
+                  autoPlay
+                />
+              ) : (
+                <img
+                  src={getMediaUrl(lightboxItem.name)}
+                  alt={lightboxItem.name}
+                  className="max-w-full max-h-[70vh] object-contain rounded-lg"
+                />
+              )}
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-4 mt-6">
+              <Button
+                variant="secondary"
+                onClick={() => downloadItem(lightboxItem.name)}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Download
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  if (confirm(`Delete ${lightboxItem.name}?`)) {
+                    deleteItem(lightboxItem.name);
+                  }
+                }}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete
+              </Button>
+            </div>
+
+            {/* File name */}
+            <p className="text-white/70 text-sm mt-4 text-center truncate max-w-full">
+              {lightboxItem.name}
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
