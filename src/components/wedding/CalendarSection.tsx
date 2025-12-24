@@ -2,10 +2,11 @@ import { useState } from "react";
 import { ChevronLeft, ChevronRight, CalendarPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const WEDDING_DATE = new Date(2025, 1, 14); // February 14, 2025
+const HALDI_DATE = new Date(2026, 1, 5); // February 5, 2026
+const WEDDING_DATE = new Date(2026, 1, 6); // February 6, 2026
 
 const CalendarSection = () => {
-  const [currentMonth, setCurrentMonth] = useState(new Date(2025, 1, 1)); // February 2025
+  const [currentMonth, setCurrentMonth] = useState(new Date(2026, 1, 1)); // February 2026
   
   const monthNames = [
     "January", "February", "March", "April", "May", "June",
@@ -35,6 +36,15 @@ const CalendarSection = () => {
     return days;
   };
   
+  const isHaldiDay = (day: number | null) => {
+    if (!day) return false;
+    return (
+      currentMonth.getFullYear() === HALDI_DATE.getFullYear() &&
+      currentMonth.getMonth() === HALDI_DATE.getMonth() &&
+      day === HALDI_DATE.getDate()
+    );
+  };
+
   const isWeddingDay = (day: number | null) => {
     if (!day) return false;
     return (
@@ -54,10 +64,10 @@ const CalendarSection = () => {
   
   const addToGoogleCalendar = () => {
     const title = encodeURIComponent("Florance & Subhankar's Wedding");
-    const details = encodeURIComponent("Two ceremonies celebrating the union of Florance & Subhankar.\n\nMorning: Catholic Wedding at St. Thomas Cathedral\nEvening: Hindu Wedding at The Grand Pavilion");
-    const location = encodeURIComponent("Mumbai, India");
-    const startDate = "20250214T040000Z"; // 9:30 AM IST
-    const endDate = "20250215T000000Z"; // 5:30 AM IST (next day)
+    const details = encodeURIComponent("Two ceremonies celebrating the union of Florance & Subhankar.\n\nMorning: Catholic Wedding at Krishnagar Cathedral Church\nEvening: Hindu Wedding at XYZ Lodge, Krishnagar");
+    const location = encodeURIComponent("Krishnagar, India");
+    const startDate = "20260206T043000Z"; // 10:00 AM IST
+    const endDate = "20260207T000000Z"; // 5:30 AM IST (next day)
     
     const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&location=${location}&dates=${startDate}/${endDate}`;
     window.open(url, '_blank');
@@ -68,11 +78,11 @@ const CalendarSection = () => {
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
       'BEGIN:VEVENT',
-      'DTSTART:20250214T093000',
-      'DTEND:20250215T010000',
+      'DTSTART:20260206T100000',
+      'DTEND:20260207T010000',
       'SUMMARY:Florance & Subhankar\'s Wedding',
-      'DESCRIPTION:Two ceremonies celebrating the union of Florance & Subhankar.\\n\\nMorning: Catholic Wedding at St. Thomas Cathedral\\nEvening: Hindu Wedding at The Grand Pavilion',
-      'LOCATION:Mumbai, India',
+      'DESCRIPTION:Two ceremonies celebrating the union of Florance & Subhankar.\\n\\nMorning: Catholic Wedding at Krishnagar Cathedral Church\\nEvening: Hindu Wedding at XYZ Lodge, Krishnagar',
+      'LOCATION:Krishnagar, India',
       'END:VEVENT',
       'END:VCALENDAR'
     ].join('\n');
@@ -152,12 +162,14 @@ const CalendarSection = () => {
                     ? '' 
                     : isWeddingDay(day)
                       ? 'bg-primary text-primary-foreground shadow-lg transform scale-110 ring-4 ring-primary/30'
-                      : 'hover:bg-secondary'
+                      : isHaldiDay(day)
+                        ? 'bg-accent text-accent-foreground shadow-md ring-2 ring-accent/30'
+                        : 'hover:bg-secondary'
                 }`}
               >
                 {day && (
                   <span className={`font-sans text-sm md:text-base ${
-                    isWeddingDay(day) ? 'font-bold' : 'text-foreground'
+                    isWeddingDay(day) || isHaldiDay(day) ? 'font-bold' : 'text-foreground'
                   }`}>
                     {day}
                   </span>
@@ -167,9 +179,12 @@ const CalendarSection = () => {
           </div>
           
           {/* Wedding date highlight */}
-          <div className="mt-8 text-center">
+          <div className="mt-8 text-center space-y-2">
+            <p className="font-serif text-base text-foreground">
+              February 5, 2026 — <span className="text-accent">Haldi Ceremony</span>
+            </p>
             <p className="font-serif text-lg text-foreground">
-              February 14, 2025 — <span className="text-primary">Our Wedding Day</span>
+              February 6, 2026 — <span className="text-primary">Our Wedding Day</span>
             </p>
           </div>
         </div>

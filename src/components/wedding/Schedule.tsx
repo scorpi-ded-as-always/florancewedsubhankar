@@ -1,32 +1,44 @@
-import { Heart, Church, Utensils, Sparkles, Music, Users } from "lucide-react";
+import { Heart, Church, Sparkles, Music, Users, Sun } from "lucide-react";
 
 const scheduleItems = [
   {
+    date: "5th February",
+    time: "All Day",
+    title: "Haldi Ceremony",
+    description: "Pre-wedding celebration at Residency",
+    icon: Sun,
+  },
+  {
+    date: "6th February",
     time: "9:30 AM",
     title: "Welcome & Arrival",
-    description: "Guests arrive at St. Thomas Cathedral",
+    description: "Guests arrive at Krishnagar Cathedral Church",
     icon: Users,
   },
   {
+    date: "6th February",
     time: "10:00 AM",
     title: "Catholic Ceremony",
-    description: "Holy Mass & Exchange of Vows",
+    description: "Holy Mass & Exchange of Vows at Krishnagar Cathedral",
     icon: Church,
   },
   {
-    time: "5:30 PM",
+    date: "6th February",
+    time: "6:30 PM",
     title: "Baraat Welcome",
-    description: "Traditional groom's procession",
+    description: "Traditional groom's procession at XYZ Lodge",
     icon: Music,
   },
   {
-    time: "6:00 PM",
+    date: "6th February",
+    time: "7:00 PM",
     title: "Hindu Ceremony",
-    description: "Sacred rituals & Pheras",
+    description: "Sacred rituals & Pheras at XYZ Lodge, Krishnagar",
     icon: Sparkles,
   },
   {
-    time: "9:00 PM",
+    date: "6th February",
+    time: "10:00 PM",
     title: "Reception & Dinner",
     description: "Celebration, dancing & feast",
     icon: Heart,
@@ -69,7 +81,10 @@ const Schedule = () => {
                 {/* Content */}
                 <div className={`flex-1 md:w-1/2 ${index % 2 === 0 ? 'md:pr-12 md:text-right' : 'md:pl-12 md:text-left'} pl-12 md:pl-0`}>
                   <div className="bg-card rounded-xl p-6 elegant-border shadow-md hover:shadow-lg transition-shadow duration-300">
-                    <span className="font-sans text-sm text-primary font-medium tracking-wider">
+                    <span className="font-sans text-xs text-muted-foreground tracking-wider">
+                      {item.date}
+                    </span>
+                    <span className="font-sans text-sm text-primary font-medium tracking-wider block">
                       {item.time}
                     </span>
                     <h3 className="font-serif text-xl md:text-2xl font-medium text-foreground mt-1">
