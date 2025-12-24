@@ -157,29 +157,52 @@ const PhotoDump = () => {
             />
           </div>
 
-          {/* Camera capture */}
-          <label className="block cursor-pointer">
-            <div className="border-2 border-dashed border-primary/30 rounded-xl p-8 md:p-12 text-center hover:border-primary/60 transition-colors bg-background/50">
-              <input
-                type="file"
-                accept="image/*"
-                capture="environment"
-                multiple
-                onChange={handleFileSelect}
-                className="hidden"
-              />
-              <Camera className="w-12 h-12 mx-auto mb-4 text-primary/50" />
-              <p className="text-lg font-medium text-foreground mb-2">
-                Tap to open camera
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Take a photo to share with the couple
-              </p>
-              <p className="text-xs text-muted-foreground mt-2">
-                JPG, PNG, WebP • Max 10MB each
-              </p>
-            </div>
-          </label>
+          {/* Upload options */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Camera capture */}
+            <label className="block cursor-pointer">
+              <div className="border-2 border-dashed border-primary/30 rounded-xl p-6 md:p-8 text-center hover:border-primary/60 transition-colors bg-background/50 h-full flex flex-col items-center justify-center">
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+                <Camera className="w-10 h-10 mx-auto mb-3 text-primary/50" />
+                <p className="text-lg font-medium text-foreground mb-1">
+                  Take Photo
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Open camera to capture a moment
+                </p>
+              </div>
+            </label>
+
+            {/* Gallery upload */}
+            <label className="block cursor-pointer">
+              <div className="border-2 border-dashed border-primary/30 rounded-xl p-6 md:p-8 text-center hover:border-primary/60 transition-colors bg-background/50 h-full flex flex-col items-center justify-center">
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+                <Upload className="w-10 h-10 mx-auto mb-3 text-primary/50" />
+                <p className="text-lg font-medium text-foreground mb-1">
+                  Upload from Gallery
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Select multiple photos at once
+                </p>
+              </div>
+            </label>
+          </div>
+
+          <p className="text-xs text-muted-foreground text-center mt-4">
+            JPG, PNG, WebP • Max 10MB each
+          </p>
 
           {/* Preview grid */}
           {files.length > 0 && (
