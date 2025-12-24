@@ -83,11 +83,13 @@ const LocationMap = () => {
                 </div>
                 
                 <Button 
-                  onClick={() => window.open(venue.mapUrl, '_blank')}
+                  asChild
                   className="w-full mt-6 bg-primary hover:bg-primary/90 text-primary-foreground font-sans"
                 >
-                  <Navigation className="w-4 h-4 mr-2" />
-                  Get Directions
+                  <a href={venue.mapUrl} target="_blank" rel="noopener noreferrer">
+                    <Navigation className="w-4 h-4 mr-2" />
+                    Get Directions
+                  </a>
                 </Button>
               </div>
             </div>
