@@ -20,7 +20,7 @@ const venues = [
     address: "D.L. Roy Road, Bowbazar, Krishnagar, Nadia - 741101",
     icon: Sparkles,
     mapUrl: "https://maps.google.com/?q=Lodge+Bhakti+Bhawan+D.L.+Roy+Road+Bowbazar+Krishnagar+Nadia+741101",
-    embedUrl: "",
+    embedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3661.6423591670164!2d88.4905989!3d23.401152000000003!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39f921057856a58b%3A0xc79519867a7bf8a8!2sCity%20Salon!5e0!3m2!1sen!2sin!4v1766591428516!5m2!1sen!2sin",
   }
 ];
 
