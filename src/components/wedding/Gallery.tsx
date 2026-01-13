@@ -8,15 +8,19 @@ import coupleBeach from "@/assets/gallery/couple-beach.png";
 import coupleLibrary2 from "@/assets/gallery/couple-library2.png";
 import coupleRocks from "@/assets/gallery/couple-rocks.png";
 import coupleReading from "@/assets/gallery/couple-reading.png";
+import coupleUmbrella from "@/assets/gallery/couple-umbrella.png";
+import coupleStairs from "@/assets/gallery/couple-stairs.png";
 
 const galleryImages = [
   { id: 1, src: couplePalace, alt: "Palace courtyard photo" },
   { id: 2, src: coupleForest, alt: "Enchanted forest moment" },
-  { id: 3, src: coupleLibrary1, alt: "Library candlelight" },
-  { id: 4, src: coupleBeach, alt: "Sunset beach walk" },
-  { id: 5, src: coupleLibrary2, alt: "Romantic library scene" },
-  { id: 6, src: coupleRocks, alt: "Seaside rocks" },
-  { id: 7, src: coupleReading, alt: "Quiet reading moment" },
+  { id: 3, src: coupleUmbrella, alt: "Umbrella flower moment" },
+  { id: 4, src: coupleLibrary1, alt: "Library candlelight" },
+  { id: 5, src: coupleBeach, alt: "Sunset beach walk" },
+  { id: 6, src: coupleStairs, alt: "Staircase portrait" },
+  { id: 7, src: coupleLibrary2, alt: "Romantic library scene" },
+  { id: 8, src: coupleRocks, alt: "Seaside rocks" },
+  { id: 9, src: coupleReading, alt: "Quiet reading moment" },
 ];
 
 const Gallery = () => {
