@@ -40,23 +40,19 @@ const Gallery = () => {
           </div>
         </div>
         
-        {/* Masonry-style gallery */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-          {galleryImages.map((image, index) => (
+        {/* Masonry-style gallery using CSS columns */}
+        <div className="columns-2 md:columns-3 gap-4 md:gap-6 space-y-4 md:space-y-6">
+          {galleryImages.map((image) => (
             <div
               key={image.id}
               onClick={() => setSelectedImage(image.id)}
-              className={`relative cursor-pointer group overflow-hidden rounded-xl elegant-border shadow-md hover:shadow-xl transition-all duration-500 ${
-                index % 3 === 0 ? 'row-span-2' : ''
-              }`}
+              className="relative cursor-pointer group overflow-hidden rounded-xl elegant-border shadow-md hover:shadow-xl transition-all duration-500 break-inside-avoid"
             >
-              <div className={`w-full ${index % 3 === 0 ? 'aspect-[3/4]' : 'aspect-square'}`}>
-                <img 
-                  src={image.src} 
-                  alt={image.alt}
-                  className="w-full h-full object-cover"
-                />
-              </div>
+              <img 
+                src={image.src} 
+                alt={image.alt}
+                className="w-full h-auto object-cover"
+              />
               
               {/* Hover overlay */}
               <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-all duration-300 flex items-center justify-center">
