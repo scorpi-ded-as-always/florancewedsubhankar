@@ -11,24 +11,51 @@ import coupleReading from "@/assets/gallery/couple-reading.png";
 import coupleUmbrella from "@/assets/gallery/couple-umbrella.png";
 import coupleStairs from "@/assets/gallery/couple-stairs.png";
 
-const galleryImages = [
+// Surrounding small images
+const smallImages = [
   { id: 1, src: couplePalace, alt: "Palace courtyard photo" },
   { id: 2, src: coupleForest, alt: "Enchanted forest moment" },
   { id: 3, src: coupleUmbrella, alt: "Umbrella flower moment" },
   { id: 4, src: coupleLibrary1, alt: "Library candlelight" },
-  { id: 5, src: coupleBeach, alt: "Sunset beach walk" },
-  { id: 6, src: coupleStairs, alt: "Staircase portrait" },
-  { id: 7, src: coupleLibrary2, alt: "Romantic library scene" },
-  { id: 8, src: coupleRocks, alt: "Seaside rocks" },
-  { id: 9, src: coupleReading, alt: "Quiet reading moment" },
+  { id: 5, src: coupleStairs, alt: "Staircase portrait" },
+  { id: 6, src: coupleLibrary2, alt: "Romantic library scene" },
+  { id: 7, src: coupleRocks, alt: "Seaside rocks" },
+  { id: 8, src: coupleReading, alt: "Quiet reading moment" },
 ];
 
+// Featured center image
+const featuredImage = { id: 0, src: coupleBeach, alt: "Sunset beach walk" };
+
 const Gallery = () => {
-  const [selectedImage, setSelectedImage] = useState<number | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  
+  const ImageCard = ({ src, alt, size = "small" }: { src: string; alt: string; size?: "small" | "large" }) => (
+    <div
+      onClick={() => setSelectedImage(src)}
+      className={`relative cursor-pointer group overflow-hidden rounded-xl elegant-border shadow-md hover:shadow-xl transition-all duration-500 ${
+        size === "large" ? "aspect-square" : "aspect-square"
+      }`}
+    >
+      <img 
+        src={src} 
+        alt={alt}
+        className="w-full h-full object-cover"
+      />
+      
+      {/* Hover overlay */}
+      <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-all duration-300 flex items-center justify-center">
+        <div className="opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 transition-all duration-300">
+          <div className="w-12 h-12 rounded-full bg-background/90 flex items-center justify-center">
+            <Heart className="w-5 h-5 text-primary" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
   
   return (
     <section id="gallery" className="py-20 md:py-32 px-6 bg-card/50">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         {/* Section header */}
         <div className="text-center mb-16">
           <p className="font-sans text-sm uppercase tracking-[0.3em] text-primary mb-4">
@@ -44,32 +71,52 @@ const Gallery = () => {
           </div>
         </div>
         
-        {/* Masonry-style gallery using CSS columns */}
-        <div className="columns-2 md:columns-3 gap-4 md:gap-6 space-y-4 md:space-y-6">
-          {galleryImages.map((image) => (
+        {/* Frame-style gallery layout */}
+        <div className="grid grid-cols-4 gap-2 md:gap-3">
+          {/* Top row - 4 small images */}
+          {smallImages.slice(0, 4).map((image) => (
+            <div key={image.id} className="col-span-1">
+              <ImageCard src={image.src} alt={image.alt} />
+            </div>
+          ))}
+          
+          {/* Middle row - 1 small, 2 cols center (large), 1 small */}
+          <div className="col-span-1">
+            <ImageCard src={smallImages[4].src} alt={smallImages[4].alt} />
+          </div>
+          <div className="col-span-2 row-span-2">
             <div
-              key={image.id}
-              onClick={() => setSelectedImage(image.id)}
-              className="relative cursor-pointer group overflow-hidden rounded-xl elegant-border shadow-md hover:shadow-xl transition-all duration-500 break-inside-avoid"
+              onClick={() => setSelectedImage(featuredImage.src)}
+              className="relative cursor-pointer group overflow-hidden rounded-xl elegant-border shadow-lg hover:shadow-2xl transition-all duration-500 h-full"
             >
               <img 
-                src={image.src} 
-                alt={image.alt}
-                className="w-full h-auto object-cover"
+                src={featuredImage.src} 
+                alt={featuredImage.alt}
+                className="w-full h-full object-cover"
               />
-              
-              {/* Hover overlay */}
               <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-all duration-300 flex items-center justify-center">
                 <div className="opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 transition-all duration-300">
-                  <div className="w-12 h-12 rounded-full bg-background/90 flex items-center justify-center">
-                    <Heart className="w-5 h-5 text-primary" />
+                  <div className="w-16 h-16 rounded-full bg-background/90 flex items-center justify-center">
+                    <Heart className="w-7 h-7 text-primary" />
                   </div>
                 </div>
               </div>
             </div>
-          ))}
+          </div>
+          <div className="col-span-1">
+            <ImageCard src={smallImages[5].src} alt={smallImages[5].alt} />
+          </div>
+          
+          {/* Bottom middle row - just side images (center is spanning) */}
+          <div className="col-span-1">
+            <ImageCard src={smallImages[6].src} alt={smallImages[6].alt} />
+          </div>
+          <div className="col-span-1">
+            <ImageCard src={smallImages[7].src} alt={smallImages[7].alt} />
+          </div>
         </div>
         
+        {/* Lightbox */}
         {/* Lightbox */}
         {selectedImage !== null && (
           <div 
@@ -84,8 +131,8 @@ const Gallery = () => {
             </button>
             <div className="max-w-4xl max-h-[80vh] rounded-xl overflow-hidden">
               <img 
-                src={galleryImages.find(img => img.id === selectedImage)?.src}
-                alt={galleryImages.find(img => img.id === selectedImage)?.alt}
+                src={selectedImage}
+                alt="Gallery photo"
                 className="max-w-full max-h-[80vh] object-contain"
               />
             </div>
