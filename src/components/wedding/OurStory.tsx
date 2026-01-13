@@ -1,5 +1,9 @@
 import { Heart } from "lucide-react";
 
+import photo1 from "@/assets/story/photo1.png";
+import photo2 from "@/assets/story/photo2.png";
+import photo3 from "@/assets/story/photo3.png";
+
 const OurStory = () => {
   return (
     <section id="our-story" className="py-20 md:py-32 px-6 bg-gradient-to-b from-background via-secondary/40 to-background relative overflow-hidden">
@@ -47,34 +51,31 @@ const OurStory = () => {
             </p>
           </div>
           
-          {/* Photo placeholders */}
+          {/* Photos */}
           <div className="grid grid-cols-2 gap-4 order-1 lg:order-2">
             <div className="space-y-4">
-              <div className="aspect-[3/4] bg-secondary/50 rounded-lg overflow-hidden elegant-border shadow-lg transform hover:scale-[1.02] transition-transform duration-300">
-                <div className="w-full h-full flex items-center justify-center text-muted-foreground/50">
-                  <div className="text-center p-4">
-                    <Heart className="w-8 h-8 mx-auto mb-2 text-primary/30" />
-                    <p className="text-sm font-sans">Photo 1</p>
-                  </div>
-                </div>
+              <div className="aspect-[3/4] rounded-lg overflow-hidden elegant-border shadow-lg transform hover:scale-[1.02] transition-transform duration-300">
+                <img 
+                  src={photo1} 
+                  alt="Couple at palace courtyard" 
+                  className="w-full h-full object-cover"
+                />
               </div>
-              <div className="aspect-square bg-secondary/50 rounded-lg overflow-hidden elegant-border shadow-lg transform hover:scale-[1.02] transition-transform duration-300">
-                <div className="w-full h-full flex items-center justify-center text-muted-foreground/50">
-                  <div className="text-center p-4">
-                    <Heart className="w-8 h-8 mx-auto mb-2 text-primary/30" />
-                    <p className="text-sm font-sans">Photo 2</p>
-                  </div>
-                </div>
+              <div className="aspect-square rounded-lg overflow-hidden elegant-border shadow-lg transform hover:scale-[1.02] transition-transform duration-300">
+                <img 
+                  src={photo2} 
+                  alt="Romantic library moment" 
+                  className="w-full h-full object-cover"
+                />
               </div>
             </div>
             <div className="pt-8">
-              <div className="aspect-[3/4] bg-secondary/50 rounded-lg overflow-hidden elegant-border shadow-lg transform hover:scale-[1.02] transition-transform duration-300">
-                <div className="w-full h-full flex items-center justify-center text-muted-foreground/50">
-                  <div className="text-center p-4">
-                    <Heart className="w-8 h-8 mx-auto mb-2 text-primary/30" />
-                    <p className="text-sm font-sans">Photo 3</p>
-                  </div>
-                </div>
+              <div className="aspect-[3/4] rounded-lg overflow-hidden elegant-border shadow-lg transform hover:scale-[1.02] transition-transform duration-300">
+                <img 
+                  src={photo3} 
+                  alt="Quiet reading together" 
+                  className="w-full h-full object-cover"
+                />
               </div>
             </div>
           </div>
