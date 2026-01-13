@@ -20,7 +20,7 @@ const venues = [
     address: "D.L. Roy Road, Bowbazar, Krishnagar, Nadia - 741101",
     icon: Sparkles,
     mapUrl: "https://maps.app.goo.gl/XQhLyJV6iv6DzcH48",
-    embedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3661.5!2d88.4905!3d23.4015!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39f9210578000001%3A0x1!2sLodge%20Bhakti%20Bhawan!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin",
+    embedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3661.640918242916!2d88.48992299999999!3d23.401204099999998!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39f92194b5b1f555%3A0x84eebb0e964d9!2sPromoda%20Bhavan!5e0!3m2!1sen!2sin!4v1768306086647!5m2!1sen!2sin",
   }
 ];
 
