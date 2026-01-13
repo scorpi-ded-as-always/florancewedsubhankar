@@ -1,13 +1,22 @@
 import { useState } from "react";
 import { Heart, X } from "lucide-react";
 
+import couplePalace from "@/assets/gallery/couple-palace.png";
+import coupleForest from "@/assets/gallery/couple-forest.png";
+import coupleLibrary1 from "@/assets/gallery/couple-library1.png";
+import coupleBeach from "@/assets/gallery/couple-beach.png";
+import coupleLibrary2 from "@/assets/gallery/couple-library2.png";
+import coupleRocks from "@/assets/gallery/couple-rocks.png";
+import coupleReading from "@/assets/gallery/couple-reading.png";
+
 const galleryImages = [
-  { id: 1, alt: "Engagement Photo 1" },
-  { id: 2, alt: "Engagement Photo 2" },
-  { id: 3, alt: "Pre-wedding Photo 1" },
-  { id: 4, alt: "Pre-wedding Photo 2" },
-  { id: 5, alt: "Couple Photo 1" },
-  { id: 6, alt: "Couple Photo 2" },
+  { id: 1, src: couplePalace, alt: "Palace courtyard photo" },
+  { id: 2, src: coupleForest, alt: "Enchanted forest moment" },
+  { id: 3, src: coupleLibrary1, alt: "Library candlelight" },
+  { id: 4, src: coupleBeach, alt: "Sunset beach walk" },
+  { id: 5, src: coupleLibrary2, alt: "Romantic library scene" },
+  { id: 6, src: coupleRocks, alt: "Seaside rocks" },
+  { id: 7, src: coupleReading, alt: "Quiet reading moment" },
 ];
 
 const Gallery = () => {
@@ -41,14 +50,12 @@ const Gallery = () => {
                 index % 3 === 0 ? 'row-span-2' : ''
               }`}
             >
-              {/* Placeholder */}
-              <div className={`w-full bg-secondary/50 ${index % 3 === 0 ? 'aspect-[3/4]' : 'aspect-square'}`}>
-                <div className="w-full h-full flex items-center justify-center">
-                  <div className="text-center p-4">
-                    <Heart className="w-8 h-8 mx-auto mb-2 text-primary/30" />
-                    <p className="text-sm font-sans text-muted-foreground/50">{image.alt}</p>
-                  </div>
-                </div>
+              <div className={`w-full ${index % 3 === 0 ? 'aspect-[3/4]' : 'aspect-square'}`}>
+                <img 
+                  src={image.src} 
+                  alt={image.alt}
+                  className="w-full h-full object-cover"
+                />
               </div>
               
               {/* Hover overlay */}
@@ -75,13 +82,12 @@ const Gallery = () => {
             >
               <X className="w-6 h-6 text-background" />
             </button>
-            <div className="max-w-4xl max-h-[80vh] bg-secondary rounded-xl overflow-hidden flex items-center justify-center p-12">
-              <div className="text-center">
-                <Heart className="w-16 h-16 mx-auto mb-4 text-primary/30" />
-                <p className="text-lg font-sans text-muted-foreground/50">
-                  {galleryImages.find(img => img.id === selectedImage)?.alt}
-                </p>
-              </div>
+            <div className="max-w-4xl max-h-[80vh] rounded-xl overflow-hidden">
+              <img 
+                src={galleryImages.find(img => img.id === selectedImage)?.src}
+                alt={galleryImages.find(img => img.id === selectedImage)?.alt}
+                className="max-w-full max-h-[80vh] object-contain"
+              />
             </div>
           </div>
         )}
