@@ -32,9 +32,12 @@ const Gallery = () => {
   const ImageCard = ({ src, alt, size = "small" }: { src: string; alt: string; size?: "small" | "large" }) => (
     <div
       onClick={() => setSelectedImage(src)}
-      className={`relative cursor-pointer group overflow-hidden rounded-xl elegant-border shadow-md hover:shadow-xl transition-all duration-500 ${
+      className={`relative cursor-pointer group overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 hover:scale-[1.02] ${
         size === "large" ? "aspect-square" : "aspect-square"
       }`}
+      style={{
+        boxShadow: '0 8px 20px -4px rgba(0,0,0,0.2), 0 4px 8px -2px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.1)'
+      }}
     >
       <img 
         src={src} 
@@ -42,10 +45,14 @@ const Gallery = () => {
         className="w-full h-full object-cover"
       />
       
+      {/* 3D border effect */}
+      <div className="absolute inset-0 rounded-xl border-2 border-white/20 pointer-events-none" />
+      <div className="absolute inset-0 rounded-xl shadow-[inset_0_2px_4px_rgba(255,255,255,0.2),inset_0_-2px_4px_rgba(0,0,0,0.1)] pointer-events-none" />
+      
       {/* Hover overlay */}
-      <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-all duration-300 flex items-center justify-center">
+      <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-all duration-300 flex items-center justify-center">
         <div className="opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 transition-all duration-300">
-          <div className="w-12 h-12 rounded-full bg-background/90 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-full bg-background/90 shadow-lg flex items-center justify-center">
             <Heart className="w-5 h-5 text-primary" />
           </div>
         </div>
@@ -94,16 +101,23 @@ const Gallery = () => {
           <div className="col-span-2 row-span-2">
             <div
               onClick={() => setSelectedImage(featuredImage.src)}
-              className="relative cursor-pointer group overflow-hidden rounded-xl elegant-border shadow-lg hover:shadow-2xl transition-all duration-500 h-full"
+              className="relative cursor-pointer group overflow-hidden rounded-xl shadow-xl hover:shadow-2xl transition-all duration-500 h-full transform hover:-translate-y-1 hover:scale-[1.01]"
+              style={{
+                boxShadow: '0 12px 28px -6px rgba(0,0,0,0.25), 0 6px 12px -4px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.1)'
+              }}
             >
               <img 
                 src={featuredImage.src} 
                 alt={featuredImage.alt}
                 className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-all duration-300 flex items-center justify-center">
+              {/* 3D border effect */}
+              <div className="absolute inset-0 rounded-xl border-2 border-white/20 pointer-events-none" />
+              <div className="absolute inset-0 rounded-xl shadow-[inset_0_2px_4px_rgba(255,255,255,0.2),inset_0_-2px_4px_rgba(0,0,0,0.1)] pointer-events-none" />
+              
+              <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-all duration-300 flex items-center justify-center">
                 <div className="opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 transition-all duration-300">
-                  <div className="w-16 h-16 rounded-full bg-background/90 flex items-center justify-center">
+                  <div className="w-16 h-16 rounded-full bg-background/90 shadow-lg flex items-center justify-center">
                     <Heart className="w-7 h-7 text-primary" />
                   </div>
                 </div>
