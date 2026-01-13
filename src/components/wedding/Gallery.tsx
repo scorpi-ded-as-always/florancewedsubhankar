@@ -71,48 +71,71 @@ const Gallery = () => {
           </div>
         </div>
         
-        {/* Frame-style gallery layout */}
-        <div className="grid grid-cols-4 gap-2 md:gap-3">
-          {/* Top row - 4 small images */}
-          {smallImages.slice(0, 4).map((image) => (
-            <div key={image.id} className="col-span-1">
-              <ImageCard src={image.src} alt={image.alt} />
+        {/* Collage frame layout */}
+        <div className="bg-foreground p-3 md:p-4 rounded-2xl shadow-2xl">
+          <div className="grid grid-cols-4 grid-rows-4 gap-2 md:gap-3">
+            {/* Top row */}
+            <div className="col-span-1 row-span-1">
+              <ImageCard src={smallImages[0].src} alt={smallImages[0].alt} />
             </div>
-          ))}
-          
-          {/* Middle row - 1 small, 2 cols center (large), 1 small */}
-          <div className="col-span-1">
-            <ImageCard src={smallImages[4].src} alt={smallImages[4].alt} />
-          </div>
-          <div className="col-span-2 row-span-2">
-            <div
-              onClick={() => setSelectedImage(featuredImage.src)}
-              className="relative cursor-pointer group overflow-hidden rounded-xl elegant-border shadow-lg hover:shadow-2xl transition-all duration-500 h-full"
-            >
-              <img 
-                src={featuredImage.src} 
-                alt={featuredImage.alt}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-all duration-300 flex items-center justify-center">
-                <div className="opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 transition-all duration-300">
-                  <div className="w-16 h-16 rounded-full bg-background/90 flex items-center justify-center">
-                    <Heart className="w-7 h-7 text-primary" />
+            <div className="col-span-1 row-span-1">
+              <ImageCard src={smallImages[1].src} alt={smallImages[1].alt} />
+            </div>
+            <div className="col-span-1 row-span-1">
+              <ImageCard src={smallImages[2].src} alt={smallImages[2].alt} />
+            </div>
+            <div className="col-span-1 row-span-1">
+              <ImageCard src={smallImages[3].src} alt={smallImages[3].alt} />
+            </div>
+            
+            {/* Second row - left, center (large spanning), right */}
+            <div className="col-span-1 row-span-1">
+              <ImageCard src={smallImages[4].src} alt={smallImages[4].alt} />
+            </div>
+            <div className="col-span-2 row-span-2">
+              <div
+                onClick={() => setSelectedImage(featuredImage.src)}
+                className="relative cursor-pointer group overflow-hidden rounded-lg shadow-lg hover:shadow-2xl transition-all duration-500 h-full"
+              >
+                <img 
+                  src={featuredImage.src} 
+                  alt={featuredImage.alt}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-all duration-300 flex items-center justify-center">
+                  <div className="opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 transition-all duration-300">
+                    <div className="w-16 h-16 rounded-full bg-background/90 flex items-center justify-center">
+                      <Heart className="w-7 h-7 text-primary" />
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div className="col-span-1">
-            <ImageCard src={smallImages[5].src} alt={smallImages[5].alt} />
-          </div>
-          
-          {/* Bottom middle row - just side images (center is spanning) */}
-          <div className="col-span-1">
-            <ImageCard src={smallImages[6].src} alt={smallImages[6].alt} />
-          </div>
-          <div className="col-span-1">
-            <ImageCard src={smallImages[7].src} alt={smallImages[7].alt} />
+            <div className="col-span-1 row-span-1">
+              <ImageCard src={smallImages[5].src} alt={smallImages[5].alt} />
+            </div>
+            
+            {/* Third row - sides only (center is spanning from above) */}
+            <div className="col-span-1 row-span-1">
+              <ImageCard src={smallImages[6].src} alt={smallImages[6].alt} />
+            </div>
+            <div className="col-span-1 row-span-1">
+              <ImageCard src={smallImages[7].src} alt={smallImages[7].alt} />
+            </div>
+            
+            {/* Bottom row */}
+            <div className="col-span-1 row-span-1">
+              <ImageCard src={smallImages[0].src} alt={smallImages[0].alt} />
+            </div>
+            <div className="col-span-1 row-span-1">
+              <ImageCard src={smallImages[1].src} alt={smallImages[1].alt} />
+            </div>
+            <div className="col-span-1 row-span-1">
+              <ImageCard src={smallImages[2].src} alt={smallImages[2].alt} />
+            </div>
+            <div className="col-span-1 row-span-1">
+              <ImageCard src={smallImages[3].src} alt={smallImages[3].alt} />
+            </div>
           </div>
         </div>
         
