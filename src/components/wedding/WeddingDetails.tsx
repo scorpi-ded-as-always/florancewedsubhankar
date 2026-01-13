@@ -158,7 +158,7 @@ const WeddingDetails = () => {
                 <div className="flex items-start gap-3">
                   <MapPin className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="font-sans font-medium">XYZ Lodge, Krishnagar</p>
+                    <p className="font-sans font-medium">Lodge Bhakti Bhawan, Krishnagar</p>
                     <p className="text-sm text-muted-foreground">Traditional Ceremony & Pheras</p>
                   </div>
                 </div>
