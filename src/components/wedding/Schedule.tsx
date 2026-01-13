@@ -39,7 +39,7 @@ const scheduleItems = [
   {
     date: "6th February",
     time: "10:00 PM",
-    title: "Reception & Dinner",
+    title: "Banquet & Dinner",
     description: "Celebration, dancing & feast",
     icon: Heart,
   },
