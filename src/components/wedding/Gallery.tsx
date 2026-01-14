@@ -82,7 +82,7 @@ const Gallery = () => {
         {/* Collage frame layout - no border, larger photos */}
         <div className="grid grid-cols-4 grid-rows-3 gap-3 md:gap-5">
           {/* Top row */}
-          <div className="col-span-1 row-span-1 translate-y-4">
+          <div className="col-span-1 row-span-1 translate-y-6">
             <ImageCard src={smallImages[0].src} alt={smallImages[0].alt} />
           </div>
           <div className="col-span-1 row-span-1">
@@ -91,7 +91,7 @@ const Gallery = () => {
           <div className="col-span-1 row-span-1">
             <ImageCard src={smallImages[2].src} alt={smallImages[2].alt} />
           </div>
-          <div className="col-span-1 row-span-1 translate-y-4">
+          <div className="col-span-1 row-span-1 translate-y-6">
             <ImageCard src={smallImages[3].src} alt={smallImages[3].alt} />
           </div>
           
