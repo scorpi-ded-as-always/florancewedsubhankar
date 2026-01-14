@@ -79,7 +79,7 @@ const Gallery = () => {
         </div>
         
         {/* Collage frame layout - no border, larger photos */}
-        <div className="grid grid-cols-4 grid-rows-4 gap-3 md:gap-5">
+        <div className="grid grid-cols-4 grid-rows-3 gap-3 md:gap-5">
           {/* Top row */}
           <div className="col-span-1 row-span-1">
             <ImageCard src={smallImages[0].src} alt={smallImages[0].alt} />
@@ -136,19 +136,6 @@ const Gallery = () => {
             <ImageCard src={smallImages[7].src} alt={smallImages[7].alt} />
           </div>
           
-          {/* Bottom row */}
-          <div className="col-span-1 row-span-1">
-            <ImageCard src={smallImages[0].src} alt={smallImages[0].alt} />
-          </div>
-          <div className="col-span-1 row-span-1">
-            <ImageCard src={smallImages[1].src} alt={smallImages[1].alt} />
-          </div>
-          <div className="col-span-1 row-span-1">
-            <ImageCard src={smallImages[2].src} alt={smallImages[2].alt} />
-          </div>
-          <div className="col-span-1 row-span-1">
-            <ImageCard src={smallImages[3].src} alt={smallImages[3].alt} />
-          </div>
         </div>
         
         {/* Lightbox */}
