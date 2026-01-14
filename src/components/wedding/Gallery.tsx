@@ -1,30 +1,31 @@
 import { useState } from "react";
 import { Heart, X } from "lucide-react";
 
+import coupleRocksSea from "@/assets/gallery/couple-rocks-sea.png";
+import coupleUmbrellaFlowers from "@/assets/gallery/couple-umbrella-flowers.png";
+import coupleForestGolden from "@/assets/gallery/couple-forest-golden.png";
+import coupleBeachWalk from "@/assets/gallery/couple-beach-walk.png";
+import coupleLibrary from "@/assets/gallery/couple-library.png";
 import couplePalace from "@/assets/gallery/couple-palace.png";
-import coupleForest from "@/assets/gallery/couple-forest.png";
-import coupleLibrary1 from "@/assets/gallery/couple-library1.png";
-import coupleBeach from "@/assets/gallery/couple-beach.png";
-import coupleLibrary2 from "@/assets/gallery/couple-library2.png";
-import coupleRocks from "@/assets/gallery/couple-rocks.png";
+import coupleMeadow from "@/assets/gallery/couple-meadow.png";
+import coupleDoor from "@/assets/gallery/couple-door.png";
 import coupleReading from "@/assets/gallery/couple-reading.png";
-import coupleUmbrella from "@/assets/gallery/couple-umbrella.png";
 import coupleStairs from "@/assets/gallery/couple-stairs.png";
 
 // Surrounding small images
 const smallImages = [
-  { id: 1, src: couplePalace, alt: "Palace courtyard photo" },
-  { id: 2, src: coupleForest, alt: "Enchanted forest moment" },
-  { id: 3, src: coupleUmbrella, alt: "Umbrella flower moment" },
-  { id: 4, src: coupleLibrary1, alt: "Library candlelight" },
-  { id: 5, src: coupleStairs, alt: "Staircase portrait" },
-  { id: 6, src: coupleLibrary2, alt: "Romantic library scene" },
-  { id: 7, src: coupleRocks, alt: "Seaside rocks" },
-  { id: 8, src: coupleReading, alt: "Quiet reading moment" },
+  { id: 1, src: coupleRocksSea, alt: "Seaside rocks moment" },
+  { id: 2, src: coupleUmbrellaFlowers, alt: "Umbrella with flowers" },
+  { id: 3, src: coupleForestGolden, alt: "Golden forest moment" },
+  { id: 4, src: couplePalace, alt: "Palace courtyard" },
+  { id: 5, src: coupleMeadow, alt: "Meadow portrait" },
+  { id: 6, src: coupleDoor, alt: "Wooden door moment" },
+  { id: 7, src: coupleReading, alt: "Reading together" },
+  { id: 8, src: coupleStairs, alt: "Staircase portrait" },
 ];
 
 // Featured center image
-const featuredImage = { id: 0, src: coupleBeach, alt: "Sunset beach walk" };
+const featuredImage = { id: 0, src: coupleBeachWalk, alt: "Beach walk at sunset" };
 
 const Gallery = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
