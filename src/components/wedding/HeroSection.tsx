@@ -62,7 +62,7 @@ const HeroSection = () => {
             src={fsLogo} 
             alt="F & S Logo" 
             className="w-32 h-32 md:w-44 md:h-44 drop-shadow-lg"
-            style={{ filter: 'sepia(100%) saturate(500%) brightness(70%) hue-rotate(-30deg) contrast(1.1)' }}
+            style={{ filter: 'sepia(100%) saturate(800%) brightness(40%) hue-rotate(-30deg) contrast(1.3)' }}
           />
         </div>
         
