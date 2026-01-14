@@ -15,7 +15,7 @@ const HeroSection = () => {
         style={{ backgroundImage: `url(${heroBackground})` }}
       />
       {/* Overlay for readability */}
-      <div className="absolute inset-0 bg-background/60" />
+      <div className="absolute inset-0 bg-background/80" />
       
       {/* Decorative floating elements */}
       <div className="absolute top-20 left-10 w-32 h-32 rounded-full bg-primary/10 blur-3xl animate-float" />
