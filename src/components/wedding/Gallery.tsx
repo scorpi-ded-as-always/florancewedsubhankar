@@ -80,7 +80,7 @@ const Gallery = () => {
         </div>
         
         {/* Collage frame layout - no border, larger photos */}
-        <div className="grid grid-cols-4 grid-rows-3 gap-3 md:gap-5">
+        <div className="grid grid-cols-4 grid-rows-3 gap-1 md:gap-2">
           {/* Top row */}
           <div className="col-span-1 row-span-1">
             <ImageCard src={smallImages[0].src} alt={smallImages[0].alt} />
