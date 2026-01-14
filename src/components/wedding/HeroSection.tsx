@@ -1,5 +1,6 @@
 import { Heart, ChevronDown } from "lucide-react";
 import fsLogo from "@/assets/fs-logo.png";
+import heroBackground from "@/assets/hero-background.png";
 
 const HeroSection = () => {
   const scrollToStory = () => {
@@ -8,8 +9,13 @@ const HeroSection = () => {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-24 pb-24 md:pt-28 md:pb-28">
-      {/* Colorful gradient background */}
-      <div className="absolute inset-0 gradient-bg" />
+      {/* Background image */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${heroBackground})` }}
+      />
+      {/* Overlay for readability */}
+      <div className="absolute inset-0 bg-background/60" />
       
       {/* Decorative floating elements */}
       <div className="absolute top-20 left-10 w-32 h-32 rounded-full bg-primary/10 blur-3xl animate-float" />
