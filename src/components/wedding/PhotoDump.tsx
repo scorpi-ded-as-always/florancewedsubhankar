@@ -178,18 +178,36 @@ const PhotoDump = () => {
         ));
 
         const fileExt = uploadedFile.file.name.split('.').pop();
-        const guestPrefix = guestName.trim() ? `${guestName.trim().replace(/\s+/g, '-')}_` : '';
-        const filePath = `${guestPrefix}${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+        const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+        const filePath = `temp/${fileName}`;
 
+        // Step 1: Upload to Supabase storage (temporary) - 80% of progress
         await uploadFileWithProgress(
           uploadedFile.file,
           filePath,
           (progress) => {
             setFiles(prev => prev.map(f => 
-              f.id === uploadedFile.id ? { ...f, progress } : f
+              f.id === uploadedFile.id ? { ...f, progress: Math.round(progress * 0.8) } : f
             ));
           }
         );
+
+        // Step 2: Transfer to Google Drive via edge function - remaining 20%
+        setFiles(prev => prev.map(f => 
+          f.id === uploadedFile.id ? { ...f, progress: 85 } : f
+        ));
+
+        const { data, error: fnError } = await supabase.functions.invoke('upload-to-drive', {
+          body: {
+            filePath,
+            fileName: uploadedFile.file.name,
+            guestName: guestName.trim() || undefined,
+          },
+        });
+
+        if (fnError || !data?.success) {
+          throw new Error(data?.error || fnError?.message || 'Failed to transfer to Drive');
+        }
 
         successCount += 1;
 
@@ -215,7 +233,7 @@ const PhotoDump = () => {
     setIsUploading(false);
 
     if (successCount > 0) {
-      toast.success(`${successCount} file(s) uploaded successfully! Thank you for sharing your memories.`);
+      toast.success(`${successCount} file(s) uploaded to Google Drive! Thank you for sharing your memories.`);
     }
     if (errorCount > 0 && successCount === 0) {
       toast.error('No files were uploaded. Please try again.');
