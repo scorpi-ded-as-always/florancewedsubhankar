@@ -1,4 +1,3 @@
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -7,139 +6,137 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const DRIVE_FOLDER_ID = Deno.env.get("GOOGLE_DRIVE_FOLDER_ID") || "";
+const BACKBLAZE_KEY_ID = Deno.env.get("BACKBLAZE_KEY_ID") || "";
+const BACKBLAZE_APP_KEY = Deno.env.get("BACKBLAZE_APP_KEY") || "";
+const BACKBLAZE_BUCKET_NAME = Deno.env.get("BACKBLAZE_BUCKET_NAME") || "";
 
-function base64UrlEncode(input: string) {
-  return btoa(input).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
+interface B2AuthResponse {
+  authorizationToken: string;
+  apiUrl: string;
+  downloadUrl: string;
+}
+
+interface B2UploadUrlResponse {
+  uploadUrl: string;
+  authorizationToken: string;
+}
+
+interface B2UploadResponse {
+  fileId: string;
+  fileName: string;
 }
 
 function mimeTypeFromName(name: string): string {
   const ext = name.split(".").pop()?.toLowerCase();
-  if (ext === "png") return "image/png";
-  if (ext === "webp") return "image/webp";
-  if (ext === "gif") return "image/gif";
-  return "image/jpeg";
+  const mimeTypes: Record<string, string> = {
+    png: "image/png",
+    webp: "image/webp",
+    gif: "image/gif",
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    mp4: "video/mp4",
+    mov: "video/quicktime",
+    heic: "image/heic",
+  };
+  return mimeTypes[ext || ""] || "application/octet-stream";
 }
 
-async function getAccessToken(serviceAccountKey: string): Promise<string> {
-  const key = JSON.parse(serviceAccountKey);
-
-  const header = { alg: "RS256", typ: "JWT" };
-  const now = Math.floor(Date.now() / 1000);
-  const payload = {
-    iss: key.client_email,
-    // Full Drive scope for server-to-server uploads into Shared Drives
-    scope: "https://www.googleapis.com/auth/drive",
-    aud: "https://oauth2.googleapis.com/token",
-    exp: now + 3600,
-    iat: now,
-  };
-
-  const unsignedToken = `${base64UrlEncode(JSON.stringify(header))}.${base64UrlEncode(
-    JSON.stringify(payload)
-  )}`;
-
-  const encoder = new TextEncoder();
-  const pemContents = key.private_key
-    .replace("-----BEGIN PRIVATE KEY-----", "")
-    .replace("-----END PRIVATE KEY-----", "")
-    .replace(/\s/g, "");
-
-  const binaryKey = Uint8Array.from(atob(pemContents), (c) => c.charCodeAt(0));
-
-  const cryptoKey = await crypto.subtle.importKey(
-    "pkcs8",
-    binaryKey,
-    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
-    false,
-    ["sign"]
-  );
-
-  const signature = await crypto.subtle.sign(
-    "RSASSA-PKCS1-v1_5",
-    cryptoKey,
-    encoder.encode(unsignedToken)
-  );
-
-  const signatureB64 = btoa(String.fromCharCode(...new Uint8Array(signature)))
-    .replace(/=/g, "")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_");
-
-  const jwt = `${unsignedToken}.${signatureB64}`;
-
-  const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`,
+async function authorizeB2(): Promise<B2AuthResponse> {
+  const credentials = btoa(`${BACKBLAZE_KEY_ID}:${BACKBLAZE_APP_KEY}`);
+  
+  const response = await fetch("https://api.backblazeb2.com/b2api/v2/b2_authorize_account", {
+    method: "GET",
+    headers: {
+      Authorization: `Basic ${credentials}`,
+    },
   });
 
-  const tokenData = await tokenResponse.json();
-  if (!tokenData.access_token) {
-    throw new Error(`Failed to get access token: ${JSON.stringify(tokenData)}`);
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`B2 authorization failed: ${error}`);
   }
 
-  return tokenData.access_token;
-}
-
-async function assertSharedDriveFolder(accessToken: string, folderId: string) {
-  const res = await fetch(
-    `https://www.googleapis.com/drive/v3/files/${folderId}?fields=id,name,driveId&supportsAllDrives=true`,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
-  );
-
-  const text = await res.text();
-  if (!res.ok) {
-    throw new Error(
-      `Could not access the configured Drive folder. Make sure the service account has access. Details: ${text}`
-    );
-  }
-
-  const data = JSON.parse(text) as { id: string; name?: string; driveId?: string };
-  console.log(`Drive folder check: name=${data.name ?? "(unknown)"}, driveId=${data.driveId ?? "(none)"}`);
-
-  if (!data.driveId) {
-    throw new Error(
-      'The configured folder is not inside a Shared Drive. Service accounts cannot upload into regular "My Drive" folders because they have no storage quota. Move/create this folder inside a Shared Drive and update the folder ID.'
-    );
-  }
-}
-
-async function uploadToDrive(
-  accessToken: string,
-  fileName: string,
-  fileBlob: Blob,
-  mimeType: string,
-  folderId: string
-): Promise<{ id: string; name: string }> {
-  const metadata = {
-    name: fileName,
-    parents: folderId ? [folderId] : undefined,
+  const data = await response.json();
+  return {
+    authorizationToken: data.authorizationToken,
+    apiUrl: data.apiUrl,
+    downloadUrl: data.downloadUrl,
   };
+}
 
-  const form = new FormData();
-  form.append("metadata", new Blob([JSON.stringify(metadata)], { type: "application/json" }));
-  form.append("file", fileBlob, fileName);
-
-  // supportsAllDrives is required for Shared Drives
-  const response = await fetch(
-    "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&supportsAllDrives=true",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: form,
-    }
-  );
+async function getBucketId(apiUrl: string, authToken: string): Promise<string> {
+  const response = await fetch(`${apiUrl}/b2api/v2/b2_list_buckets`, {
+    method: "POST",
+    headers: {
+      Authorization: authToken,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      accountId: BACKBLAZE_KEY_ID.substring(0, 12), // First 12 chars is account ID
+      bucketName: BACKBLAZE_BUCKET_NAME,
+    }),
+  });
 
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Drive upload failed: ${errorText}`);
+    const error = await response.text();
+    throw new Error(`Failed to get bucket ID: ${error}`);
+  }
+
+  const data = await response.json();
+  const bucket = data.buckets.find((b: { bucketName: string }) => b.bucketName === BACKBLAZE_BUCKET_NAME);
+  
+  if (!bucket) {
+    throw new Error(`Bucket "${BACKBLAZE_BUCKET_NAME}" not found`);
+  }
+
+  return bucket.bucketId;
+}
+
+async function getUploadUrl(apiUrl: string, authToken: string, bucketId: string): Promise<B2UploadUrlResponse> {
+  const response = await fetch(`${apiUrl}/b2api/v2/b2_get_upload_url`, {
+    method: "POST",
+    headers: {
+      Authorization: authToken,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ bucketId }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Failed to get upload URL: ${error}`);
+  }
+
+  return response.json();
+}
+
+async function uploadToB2(
+  uploadUrl: string,
+  uploadAuthToken: string,
+  fileName: string,
+  fileData: ArrayBuffer,
+  mimeType: string
+): Promise<B2UploadResponse> {
+  // Calculate SHA1 hash
+  const hashBuffer = await crypto.subtle.digest("SHA-1", fileData);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const sha1Hash = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+
+  const response = await fetch(uploadUrl, {
+    method: "POST",
+    headers: {
+      Authorization: uploadAuthToken,
+      "Content-Type": mimeType,
+      "Content-Length": fileData.byteLength.toString(),
+      "X-Bz-File-Name": encodeURIComponent(fileName),
+      "X-Bz-Content-Sha1": sha1Hash,
+    },
+    body: fileData,
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`B2 upload failed: ${error}`);
   }
 
   return response.json();
@@ -154,15 +151,9 @@ serve(async (req) => {
     const { filePath, fileName, guestName } = await req.json();
 
     console.log(`Processing upload for file: ${fileName} from guest: ${guestName}`);
-    console.log(`Drive folder configured: ${DRIVE_FOLDER_ID ? "yes" : "no"}`);
 
-    const serviceAccountKey = Deno.env.get("GOOGLE_SERVICE_ACCOUNT_KEY");
-    if (!serviceAccountKey) {
-      throw new Error("Google Service Account key not configured");
-    }
-
-    if (!DRIVE_FOLDER_ID) {
-      throw new Error("Google Drive folder ID not configured");
+    if (!BACKBLAZE_KEY_ID || !BACKBLAZE_APP_KEY || !BACKBLAZE_BUCKET_NAME) {
+      throw new Error("Backblaze credentials not configured");
     }
 
     // Backend client with service role
@@ -170,7 +161,7 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Download file from storage
+    // Download file from temporary storage
     const { data: fileData, error: downloadError } = await supabase.storage
       .from("photo-dump")
       .download(filePath);
@@ -181,33 +172,47 @@ serve(async (req) => {
 
     console.log(`Downloaded file from storage, size: ${fileData.size}`);
 
-    const accessToken = await getAccessToken(serviceAccountKey);
-    console.log("Got Google access token");
+    // Authorize with Backblaze
+    const auth = await authorizeB2();
+    console.log("Authorized with Backblaze B2");
 
-    // Make the failure mode explicit: shared drive required
-    await assertSharedDriveFolder(accessToken, DRIVE_FOLDER_ID);
+    // Get bucket ID
+    const bucketId = await getBucketId(auth.apiUrl, auth.authorizationToken);
+    console.log(`Got bucket ID: ${bucketId}`);
 
-    const finalFileName = guestName ? `${guestName}_${fileName}` : fileName;
+    // Get upload URL
+    const uploadInfo = await getUploadUrl(auth.apiUrl, auth.authorizationToken, bucketId);
+    console.log("Got upload URL");
 
-    const driveResult = await uploadToDrive(
-      accessToken,
+    // Prepare file name with guest prefix
+    const finalFileName = guestName ? `${guestName}/${fileName}` : fileName;
+    const mimeType = mimeTypeFromName(fileName);
+    const fileBuffer = await fileData.arrayBuffer();
+
+    // Upload to Backblaze
+    const uploadResult = await uploadToB2(
+      uploadInfo.uploadUrl,
+      uploadInfo.authorizationToken,
       finalFileName,
-      fileData,
-      fileData.type || mimeTypeFromName(fileName),
-      DRIVE_FOLDER_ID
+      fileBuffer,
+      mimeType
     );
 
-    console.log(`Uploaded to Google Drive: ${driveResult.id}`);
+    console.log(`Uploaded to Backblaze B2: ${uploadResult.fileId}`);
 
-    // Cleanup
+    // Cleanup temporary storage
     await supabase.storage.from("photo-dump").remove([filePath]);
     console.log("Cleaned up temporary storage");
+
+    // Construct public URL
+    const publicUrl = `${auth.downloadUrl}/file/${BACKBLAZE_BUCKET_NAME}/${encodeURIComponent(finalFileName)}`;
 
     return new Response(
       JSON.stringify({
         success: true,
-        driveFileId: driveResult.id,
-        fileName: driveResult.name,
+        fileId: uploadResult.fileId,
+        fileName: uploadResult.fileName,
+        publicUrl,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
