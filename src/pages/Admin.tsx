@@ -6,26 +6,24 @@ import { toast } from "sonner";
 import { Download, RefreshCw, Image, Lock, Trash2, Archive, X, Play } from "lucide-react";
 import JSZip from "jszip";
 
-interface MediaFile {
-  name: string;
+interface B2File {
   id: string;
-  created_at: string;
-  metadata?: {
-    size?: number;
-    mimetype?: string;
-  };
+  name: string;
+  size: number;
+  contentType: string;
+  uploadedAt: string;
+  publicUrl: string;
 }
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
-  const [media, setMedia] = useState<MediaFile[]>([]);
+  const [media, setMedia] = useState<B2File[]>([]);
   const [loading, setLoading] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState<Set<string>>(new Set());
-  const [lightboxItem, setLightboxItem] = useState<MediaFile | null>(null);
+  const [lightboxItem, setLightboxItem] = useState<B2File | null>(null);
 
-  // Simple password check - in production, use proper auth
   const ADMIN_PASSWORD = "wedding2025";
 
   const handleLogin = (e: React.FormEvent) => {
@@ -59,57 +57,45 @@ const Admin = () => {
   const fetchMedia = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.storage
-        .from("photo-dump")
-        .list("", {
-          limit: 1000,
-          sortBy: { column: "created_at", order: "desc" },
-        });
+      const { data, error } = await supabase.functions.invoke("list-b2-files");
 
       if (error) throw error;
+      if (!data.success) throw new Error(data.error);
       
-      const mediaList = (data || []).filter(file => file.name && !file.name.startsWith('.'));
-      setMedia(mediaList);
+      setMedia(data.files || []);
     } catch (error) {
       console.error("Error fetching media:", error);
-      toast.error("Failed to fetch media");
+      toast.error("Failed to fetch media from Backblaze");
     } finally {
       setLoading(false);
     }
   };
 
-  const getMediaUrl = (fileName: string) => {
-    const { data } = supabase.storage
-      .from("photo-dump")
-      .getPublicUrl(fileName);
-    return data.publicUrl;
-  };
-
-  const downloadItem = async (fileName: string) => {
+  const downloadItem = async (file: B2File) => {
     try {
-      const { data, error } = await supabase.storage
-        .from("photo-dump")
-        .download(fileName);
-
-      if (error) throw error;
-
-      const url = URL.createObjectURL(data);
+      toast.info(`Downloading ${file.name}...`);
+      
+      const response = await fetch(file.publicUrl);
+      if (!response.ok) throw new Error("Failed to download");
+      
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = fileName;
+      a.download = file.name.split('/').pop() || file.name;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      toast.success(`Downloaded ${fileName}`);
+      toast.success(`Downloaded ${file.name}`);
     } catch (error) {
       console.error("Download error:", error);
       toast.error("Failed to download");
     }
   };
 
-  const downloadAsZip = async (itemsToDownload: MediaFile[], zipName: string) => {
+  const downloadAsZip = async (itemsToDownload: B2File[], zipName: string) => {
     if (itemsToDownload.length === 0) return;
     
     setDownloading(true);
@@ -121,16 +107,15 @@ const Admin = () => {
       let completed = 0;
       for (const item of itemsToDownload) {
         try {
-          const { data, error } = await supabase.storage
-            .from("photo-dump")
-            .download(item.name);
-
-          if (error) {
-            console.error(`Failed to download ${item.name}:`, error);
+          const response = await fetch(item.publicUrl);
+          if (!response.ok) {
+            console.error(`Failed to download ${item.name}`);
             continue;
           }
 
-          zip.file(item.name, data);
+          const blob = await response.blob();
+          const fileName = item.name.split('/').pop() || item.name;
+          zip.file(fileName, blob);
           completed++;
           
           if (completed % 5 === 0) {
@@ -166,15 +151,16 @@ const Admin = () => {
     await downloadAsZip(media, "wedding-media.zip");
   };
 
-  const deleteItem = async (fileName: string) => {
+  const deleteItem = async (file: B2File) => {
     try {
-      const { error } = await supabase.storage
-        .from("photo-dump")
-        .remove([fileName]);
+      const { data, error } = await supabase.functions.invoke("delete-b2-file", {
+        body: { fileId: file.id, fileName: file.name },
+      });
 
       if (error) throw error;
+      if (!data.success) throw new Error(data.error);
 
-      setMedia((prev) => prev.filter((p) => p.name !== fileName));
+      setMedia((prev) => prev.filter((p) => p.id !== file.id));
       setLightboxItem(null);
       toast.success("Deleted successfully");
     } catch (error) {
@@ -183,20 +169,20 @@ const Admin = () => {
     }
   };
 
-  const toggleSelect = (name: string) => {
+  const toggleSelect = (id: string) => {
     setSelectedMedia((prev) => {
       const next = new Set(prev);
-      if (next.has(name)) {
-        next.delete(name);
+      if (next.has(id)) {
+        next.delete(id);
       } else {
-        next.add(name);
+        next.add(id);
       }
       return next;
     });
   };
 
   const downloadSelected = async () => {
-    const toDownload = media.filter((p) => selectedMedia.has(p.name));
+    const toDownload = media.filter((p) => selectedMedia.has(p.id));
     await downloadAsZip(toDownload, "selected-media.zip");
   };
 
@@ -210,7 +196,13 @@ const Admin = () => {
     });
   };
 
-  const openLightbox = (item: MediaFile, e: React.MouseEvent) => {
+  const formatSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const openLightbox = (item: B2File, e: React.MouseEvent) => {
     e.stopPropagation();
     setLightboxItem(item);
   };
@@ -255,7 +247,7 @@ const Admin = () => {
           <div>
             <h1 className="text-3xl font-serif text-foreground">Media Admin</h1>
             <p className="text-muted-foreground">
-              {media.length} file(s) uploaded
+              {media.length} file(s) in Backblaze B2
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -277,7 +269,12 @@ const Admin = () => {
         </div>
 
         {/* Media grid */}
-        {media.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-20">
+            <RefreshCw className="w-8 h-8 mx-auto mb-4 text-primary animate-spin" />
+            <p className="text-muted-foreground">Loading media from Backblaze...</p>
+          </div>
+        ) : media.length === 0 ? (
           <div className="text-center py-20">
             <Image className="w-16 h-16 mx-auto mb-4 text-muted-foreground/30" />
             <p className="text-muted-foreground">No media uploaded yet</p>
@@ -288,7 +285,7 @@ const Admin = () => {
               <div
                 key={item.id}
                 className={`group relative aspect-square rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
-                  selectedMedia.has(item.name)
+                  selectedMedia.has(item.id)
                     ? "border-primary ring-2 ring-primary/20"
                     : "border-transparent hover:border-primary/30"
                 }`}
@@ -300,7 +297,7 @@ const Admin = () => {
                   </div>
                 ) : (
                   <img
-                    src={getMediaUrl(item.name)}
+                    src={item.publicUrl}
                     alt={item.name}
                     className="w-full h-full object-cover"
                     loading="lazy"
@@ -312,15 +309,15 @@ const Admin = () => {
                   className="absolute top-2 left-2 z-10"
                   onClick={(e) => {
                     e.stopPropagation();
-                    toggleSelect(item.name);
+                    toggleSelect(item.id);
                   }}
                 >
                   <div className={`w-5 h-5 rounded-full flex items-center justify-center border-2 ${
-                    selectedMedia.has(item.name) 
+                    selectedMedia.has(item.id) 
                       ? "bg-primary border-primary" 
                       : "bg-background/80 border-muted-foreground/50"
                   }`}>
-                    {selectedMedia.has(item.name) && (
+                    {selectedMedia.has(item.id) && (
                       <span className="text-xs text-primary-foreground font-bold">✓</span>
                     )}
                   </div>
@@ -328,9 +325,11 @@ const Admin = () => {
 
                 {/* Info */}
                 <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-foreground/80 to-transparent">
-                  <p className="text-xs text-background truncate">{item.name}</p>
+                  <p className="text-xs text-background truncate">
+                    {item.name.split('/').pop()}
+                  </p>
                   <p className="text-xs text-background/70">
-                    {formatDate(item.created_at)}
+                    {formatSize(item.size)} • {formatDate(item.uploadedAt)}
                   </p>
                 </div>
               </div>
@@ -361,14 +360,14 @@ const Admin = () => {
             <div className="w-full flex-1 flex items-center justify-center overflow-hidden">
               {isVideo(lightboxItem.name) ? (
                 <video 
-                  src={getMediaUrl(lightboxItem.name)} 
+                  src={lightboxItem.publicUrl} 
                   controls 
                   className="max-w-full max-h-[70vh] rounded-lg"
                   autoPlay
                 />
               ) : (
                 <img
-                  src={getMediaUrl(lightboxItem.name)}
+                  src={lightboxItem.publicUrl}
                   alt={lightboxItem.name}
                   className="max-w-full max-h-[70vh] object-contain rounded-lg"
                 />
@@ -379,7 +378,7 @@ const Admin = () => {
             <div className="flex items-center gap-4 mt-6">
               <Button
                 variant="secondary"
-                onClick={() => downloadItem(lightboxItem.name)}
+                onClick={() => downloadItem(lightboxItem)}
               >
                 <Download className="w-4 h-4 mr-2" />
                 Download
@@ -388,7 +387,7 @@ const Admin = () => {
                 variant="destructive"
                 onClick={() => {
                   if (confirm(`Delete ${lightboxItem.name}?`)) {
-                    deleteItem(lightboxItem.name);
+                    deleteItem(lightboxItem);
                   }
                 }}
               >
@@ -397,10 +396,15 @@ const Admin = () => {
               </Button>
             </div>
 
-            {/* File name */}
-            <p className="text-white/70 text-sm mt-4 text-center truncate max-w-full">
-              {lightboxItem.name}
-            </p>
+            {/* File info */}
+            <div className="text-center mt-4">
+              <p className="text-white/70 text-sm truncate max-w-full">
+                {lightboxItem.name}
+              </p>
+              <p className="text-white/50 text-xs">
+                {formatSize(lightboxItem.size)} • Uploaded {formatDate(lightboxItem.uploadedAt)}
+              </p>
+            </div>
           </div>
         </div>
       )}
