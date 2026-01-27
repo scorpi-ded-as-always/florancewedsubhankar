@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { Download, RefreshCw, Image, Lock, Trash2, Archive, X, Play } from "lucide-react";
 import JSZip from "jszip";
 
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+
 interface B2File {
   id: string;
   name: string;
@@ -14,6 +16,11 @@ interface B2File {
   uploadedAt: string;
   publicUrl: string;
 }
+
+// Proxy URL through edge function to handle auth and CORS
+const getProxyUrl = (fileName: string) => {
+  return `${SUPABASE_URL}/functions/v1/get-b2-file?file=${encodeURIComponent(fileName)}`;
+};
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -75,7 +82,7 @@ const Admin = () => {
     try {
       toast.info(`Downloading ${file.name}...`);
       
-      const response = await fetch(file.publicUrl);
+      const response = await fetch(getProxyUrl(file.name));
       if (!response.ok) throw new Error("Failed to download");
       
       const blob = await response.blob();
@@ -107,7 +114,7 @@ const Admin = () => {
       let completed = 0;
       for (const item of itemsToDownload) {
         try {
-          const response = await fetch(item.publicUrl);
+          const response = await fetch(getProxyUrl(item.name));
           if (!response.ok) {
             console.error(`Failed to download ${item.name}`);
             continue;
@@ -297,7 +304,7 @@ const Admin = () => {
                   </div>
                 ) : (
                   <img
-                    src={item.publicUrl}
+                    src={getProxyUrl(item.name)}
                     alt={item.name}
                     className="w-full h-full object-cover"
                     loading="lazy"
@@ -360,14 +367,14 @@ const Admin = () => {
             <div className="w-full flex-1 flex items-center justify-center overflow-hidden">
               {isVideo(lightboxItem.name) ? (
                 <video 
-                  src={lightboxItem.publicUrl} 
+                  src={getProxyUrl(lightboxItem.name)} 
                   controls 
                   className="max-w-full max-h-[70vh] rounded-lg"
                   autoPlay
                 />
               ) : (
                 <img
-                  src={lightboxItem.publicUrl}
+                  src={getProxyUrl(lightboxItem.name)}
                   alt={lightboxItem.name}
                   className="max-w-full max-h-[70vh] object-contain rounded-lg"
                 />
