@@ -24,24 +24,24 @@ const scheduleItems = [
   },
   {
     date: "6th February",
-    time: "6:30 PM",
+    time: "7:00 PM",
+    title: "Banquet & Dinner",
+    description: "Celebration, dancing & feast",
+    icon: Heart,
+  },
+  {
+    date: "6th February",
+    time: "8:00 PM",
     title: "Baraat Welcome",
     description: "Traditional groom's procession at Lodge Bhakti Bhawan",
     icon: Music,
   },
   {
     date: "6th February",
-    time: "7:00 PM",
+    time: "10:15 PM",
     title: "Hindu Ceremony",
     description: "Sacred rituals & Pheras at Lodge Bhakti Bhawan, Krishnagar",
     icon: Sparkles,
-  },
-  {
-    date: "6th February",
-    time: "10:00 PM",
-    title: "Banquet & Dinner",
-    description: "Celebration, dancing & feast",
-    icon: Heart,
   },
 ];
 
