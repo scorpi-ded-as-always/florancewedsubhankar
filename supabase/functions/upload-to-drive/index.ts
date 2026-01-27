@@ -6,14 +6,17 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const BACKBLAZE_KEY_ID = Deno.env.get("BACKBLAZE_KEY_ID") || "";
-const BACKBLAZE_APP_KEY = Deno.env.get("BACKBLAZE_APP_KEY") || "";
-const BACKBLAZE_BUCKET_NAME = Deno.env.get("BACKBLAZE_BUCKET_NAME") || "";
+// Secrets can sometimes include trailing whitespace/newlines depending on how they're pasted.
+// Trimming here avoids hard-to-debug auth failures.
+const BACKBLAZE_KEY_ID = (Deno.env.get("BACKBLAZE_KEY_ID") || "").trim();
+const BACKBLAZE_APP_KEY = (Deno.env.get("BACKBLAZE_APP_KEY") || "").trim();
+const BACKBLAZE_BUCKET_NAME = (Deno.env.get("BACKBLAZE_BUCKET_NAME") || "").trim();
 
 interface B2AuthResponse {
   authorizationToken: string;
   apiUrl: string;
   downloadUrl: string;
+  accountId: string;
 }
 
 interface B2UploadUrlResponse {
@@ -53,7 +56,7 @@ async function authorizeB2(): Promise<B2AuthResponse> {
 
   if (!response.ok) {
     const error = await response.text();
-    throw new Error(`B2 authorization failed: ${error}`);
+    throw new Error(`B2 authorization failed (${response.status}): ${error}`);
   }
 
   const data = await response.json();
@@ -61,10 +64,11 @@ async function authorizeB2(): Promise<B2AuthResponse> {
     authorizationToken: data.authorizationToken,
     apiUrl: data.apiUrl,
     downloadUrl: data.downloadUrl,
+    accountId: data.accountId,
   };
 }
 
-async function getBucketId(apiUrl: string, authToken: string): Promise<string> {
+async function getBucketId(apiUrl: string, authToken: string, accountId: string): Promise<string> {
   const response = await fetch(`${apiUrl}/b2api/v2/b2_list_buckets`, {
     method: "POST",
     headers: {
@@ -72,7 +76,9 @@ async function getBucketId(apiUrl: string, authToken: string): Promise<string> {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      accountId: BACKBLAZE_KEY_ID.substring(0, 12), // First 12 chars is account ID
+      // IMPORTANT: Backblaze requires the real accountId returned by b2_authorize_account.
+      // The application key ID is NOT the accountId.
+      accountId,
       bucketName: BACKBLAZE_BUCKET_NAME,
     }),
   });
@@ -156,6 +162,11 @@ serve(async (req) => {
       throw new Error("Backblaze credentials not configured");
     }
 
+    // Helpful debug info without leaking secrets
+    console.log(
+      `Backblaze env present. keyIdLen=${BACKBLAZE_KEY_ID.length} appKeyLen=${BACKBLAZE_APP_KEY.length} bucket=${BACKBLAZE_BUCKET_NAME}`,
+    );
+
     // Backend client with service role
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -177,7 +188,7 @@ serve(async (req) => {
     console.log("Authorized with Backblaze B2");
 
     // Get bucket ID
-    const bucketId = await getBucketId(auth.apiUrl, auth.authorizationToken);
+    const bucketId = await getBucketId(auth.apiUrl, auth.authorizationToken, auth.accountId);
     console.log(`Got bucket ID: ${bucketId}`);
 
     // Get upload URL
