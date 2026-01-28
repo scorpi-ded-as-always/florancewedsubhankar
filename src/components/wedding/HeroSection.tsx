@@ -7,7 +7,7 @@ const HeroSection = () => {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-24 pb-24 md:pt-28 md:pb-28 bg-gradient-to-b from-[hsl(35,45%,88%)] via-[hsl(38,55%,55%)] to-[hsl(38,65%,45%)]">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-24 pb-24 md:pt-28 md:pb-28 bg-gradient-to-b from-[hsl(35,40%,92%)] via-[hsl(38,50%,70%)] to-[hsl(38,55%,55%)]">
       
       {/* Decorative floating elements */}
       <div className="absolute top-20 left-10 w-32 h-32 rounded-full bg-primary/10 blur-3xl animate-float" />
